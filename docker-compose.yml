@@ -1,0 +1,54 @@
+services:
+  db:
+    container_name: db_postgres_container
+    image: db_postgresql_flask
+    env_file:
+      - .env
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - app_network
+
+  backend:
+    container_name: backend_container
+    image: backend_flask
+    env_file:
+      - .env
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - backend_flask_volume:/app
+    ports:
+      - "5000:5000"
+    networks:
+      - app_network
+    depends_on:
+      - db
+    # tty: true
+    # stdin_open: true
+    # command: /bin/bash
+
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  db_volume:
+  backend_flask_volume:
+    name: backend_flask_volume 
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './backend/'
