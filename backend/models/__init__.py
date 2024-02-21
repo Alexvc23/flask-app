@@ -1,14 +1,6 @@
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+# In the __init__.py file of the models directory, import your models to make them accessible through the package. 
+#This approach also helps with resolving circular dependencies and makes imports cleaner in other parts of your application.
+# /backend/models/__init__.py:
 
-Base = declarative_base()
-
-# Example model
-class User(Base):
-    __tablename__ = 'users'
-
-    id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    # Add additional fields and relationships as needed
+from .base import Base  # Import the base class to make it available for metadata creation
+from .user import User  # Import the User model to make it available for import from the models package
