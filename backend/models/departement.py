@@ -5,4 +5,4 @@ from .base import Base
 class Departement(Base):
     __tablename__ = 'departements'
     DEP_CODE = Column(String, primary_key=True)
-    DEP_NAME = Column(String, nullable=False)
+    DEP_NOM = Column(String, nullable=False)

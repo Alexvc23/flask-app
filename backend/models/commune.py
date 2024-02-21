@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from departement import Departement
+from .departement import Departement
 from .base import Base
 
 """ Commune
