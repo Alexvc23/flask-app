@@ -19,4 +19,9 @@ POSTGRES_DB = os.getenv('POSTGRES_DB', 'default_db')
 POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
 
 # Constructing the DATABASE_URL string using the retrieved environment variables
-DATABASE_URL = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:5432/{POSTGRES_DB}'
+DATABASE_URL =  f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:5432/{POSTGRES_DB}'
+
+class Config:
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL 
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
