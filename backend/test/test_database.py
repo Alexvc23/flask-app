@@ -1,8 +1,10 @@
 import unittest
+import pandas as pd  # Pandas is a popular library for data manipulation and analysis
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base, User, Departement, Commune, Affaire  # Import your models here
 from config.settings import DATABASE_URL
+from scripts.import_data import load_data
 from colorama import Fore, Style  # Import colorama for colored output
 
 class DatabaseConnectionTest(unittest.TestCase):
@@ -10,20 +12,25 @@ class DatabaseConnectionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         print(f"{Fore.BLUE}Setting up test class...{Style.RESET_ALL}")
-        # Connect to the test database
         cls.engine = create_engine(DATABASE_URL)
-        Base.metadata.create_all(cls.engine)
+        Base.metadata.create_all(cls.engine)  # Create the schema in the test database
         cls.Session = sessionmaker(bind=cls.engine)
+        cls.session = cls.Session()  # Create an instance of a session
+        df = pd.read_csv('/Users/alex/Documents/programing/flask-app-alex/backend/data/data.csv', dtype={'DEP_CODE': str, 'COM_CODE': str})
+        load_data(cls.session, df)  # Pass the session instance, not the sessionmaker
+        cls.session.commit()  # Make sure to commit the changes
         print(f"{Fore.YELLOW}--------------------------------------------------\n{Style.RESET_ALL}")
 
     @classmethod
     def tearDownClass(cls):
         print(f"{Fore.BLUE}Tearing down test class...{Style.RESET_ALL}")
-        # Drop all tables and close the connection
-        Base.metadata.drop_all(cls.engine)
-        cls.engine.dispose()
+        cls.session.close()  # Close the session
+        Base.metadata.drop_all(cls.engine)  # Drop all tables
+        cls.engine.dispose()  # Dispose of the connection pool
 
         print(f"{Fore.YELLOW}--------------------------------------------------\n{Style.RESET_ALL}")
+
+    # ──────────────────────────────────────────────────────────────────────
 
     def setUp(self):
         print(f"{Fore.CYAN}Setting up test...{Style.RESET_ALL}")
@@ -38,6 +45,7 @@ class DatabaseConnectionTest(unittest.TestCase):
         self.session.close()
         self.transaction.rollback()
         self.connection.close()
+    # ──────────────────────────────────────────────────────────────────────
 
     def test_departement_creation(self):
         print(f"{Fore.GREEN}Testing department creation...{Style.RESET_ALL}")
@@ -51,6 +59,8 @@ class DatabaseConnectionTest(unittest.TestCase):
         self.assertIsNotNone(added_departement)
         self.assertEqual(added_departement.DEP_NOM, 'Example Departement')
         print(f"{Fore.YELLOW}--------------------------------------------------\n{Style.RESET_ALL}")
+
+    # ──────────────────────────────────────────────────────────────────────
 
     def test_commune_creation(self):
         print(f"{Fore.GREEN}Testing commune creation...{Style.RESET_ALL}")
@@ -70,6 +80,8 @@ class DatabaseConnectionTest(unittest.TestCase):
         self.assertIsNotNone(added_commune)
         self.assertEqual(added_commune.COM_NOM, 'Example Commune')
         print(f"{Fore.YELLOW}--------------------------------------------------\n{Style.RESET_ALL}")
+
+    # ──────────────────────────────────────────────────────────────────────
 
     def test_affaire_creation(self):
         print(f"{Fore.GREEN}Testing affaire creation...{Style.RESET_ALL}")

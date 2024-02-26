@@ -14,3 +14,6 @@ class Commune(Base):
     COM_NOM = Column(String, nullable=False)
     DEP_CODE = Column(String, ForeignKey('departements.DEP_CODE'))
     departement = relationship("Departement")
+
+    def __repr__(self):
+            return f"<Commune(COM_CODE='{self.COM_CODE}', COM_NOM='{self.COM_NOM}', DEP_CODE='{self.DEP_CODE}')>"

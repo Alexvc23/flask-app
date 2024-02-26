@@ -1,16 +1,23 @@
+import sys
+sys.path.append('/Users/alex/Documents/programming/flask-app-alex/backend')
+
 # Import necessary libraries
 import pandas as pd  # Pandas is a popular library for data manipulation and analysis
 from sqlalchemy import create_engine, exc  # SQLAlchemy is a toolkit for SQL databases in Python
 from sqlalchemy.orm import sessionmaker  # SQLAlchemy sessionmaker is used to create sessions
-from models import Base, Departement, Commune  # Import database models
+from models import Base, Commune, Departement
+from scripts.initialize_db import initialize_db
 from config.settings import DATABASE_URL  # Import database connection settings
 
 # Set up database connection
 engine = create_engine(DATABASE_URL)  # Create a database engine using the connection URL
+
+initialize_db()
+
 Session = sessionmaker(bind=engine)  # Create a session class bound to the engine
 
 # Read CSV data
-df = pd.read_csv('data/data.csv')  # Read data from a CSV file into a pandas DataFrame
+df = pd.read_csv('/Users/alex/Documents/programing/flask-app-alex/backend/data/data.csv', dtype={'DEP_CODE': str, 'COM_CODE': str})
 
 # Function to check and add departement
 def add_departement(session, dep_code, dep_nom):

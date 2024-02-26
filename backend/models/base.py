@@ -2,7 +2,7 @@
 # within the models directory. This makes the Base class easily importable in other model 
 # files and helps avoid circular imports.
 
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 # Create a base class for all mapped classes to inherit from
 Base = declarative_base()
