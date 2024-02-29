@@ -4,9 +4,9 @@
 
 # /backend/models/user.py:
 from sqlalchemy import Column, Integer, String
-from .base import Base  # Import Base from base.py
+from .base import db
 
-class User(Base):
+class User(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String(50), unique=True, nullable=False)

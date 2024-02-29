@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from .base import Base
+from .base import db
 
-class Affaire(Base):
+class Affaire(db.Model):
     __tablename__ = 'affaires'
     ID = Column(Integer, primary_key=True, autoincrement=True)
     Nom = Column(String, nullable=False)

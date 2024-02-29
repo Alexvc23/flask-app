@@ -7,7 +7,7 @@ from config.settings import Config
 # Import Migrate class from flask_migrate for handling database migrations
 from flask_migrate import Migrate
 # Import models from the models module to ensure they are recognized by SQLAlchemy
-from models import Departement, Commune, Affaire, User  
+from models import Departement, Commune, Affaire, User, db
 
 from sqlalchemy.exc import SQLAlchemyError # to handle exception 
 
@@ -18,12 +18,7 @@ app = Flask(__name__)
 # Load configuration settings from the Config class
 app.config.from_object(Config)
 
-# Initialize SQLAlchemy object and bind it to the Flask application
-# SQLAlchemy is an ORM (Object-Relational Mapping) tool that simplifies database management in Flask applications.
-# By creating an instance of SQLAlchemy and binding it to the Flask application,
-# we enable interaction with the database using SQLAlchemy's ORM features.
-# This allows us to define database models as Python classes and perform operations on them easily.
-db = SQLAlchemy(app)
+db.init_app(app)
 
 # Initialize the Migrate object with the Flask app and SQLAlchemy db instance
 # This allows for easy database migrations using Flask-Migrate
