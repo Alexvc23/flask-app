@@ -1,21 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 
 const apiAddress = "http://localhost:5000";
 
 const AffaireForm = () => {
     const [nomDeLaffaire, setNomDeLaffaire] = useState('');
-    const [department, setDepartment] = useState([]); // variable to store only the department choosen by the client 
+    const [department, setDepartment] = useState(''); // variable to store only the department choosen by the client 
     const [departments, setDepartments] = useState([]); // variable to store the stire department list
-    // const [commune, setCommune] = useState('');
-    // const [communes, setCommunes] = useState('');
+    const [commune, setCommune] = useState([]);
+    const [communes, setCommunes] = useState([]);
     const [precision, setPrecision] = useState('');
-
-   // const departments = ['department 1', 'department 2', 'department 3'];
-    // let department = '';
-    const communes = ['Commune A', 'Commune B', 'Commune C'];
-    let commune = '';
-    let selectedDepartment = '';
 
     /*
     
@@ -29,7 +22,7 @@ const AffaireForm = () => {
     */
 
     const fetchDepartments = async () => {
-        fetch('http://localhost:5000/departement')
+        fetch(`${apiAddress}/departement`)
             .then(response => response.json())
             .then(data => {setDepartments(data); console.log(departments)})
             .catch(error => console.error('Error fetching departements:', error));
@@ -37,14 +30,12 @@ const AffaireForm = () => {
 
     const fetchCommunes = async () => {
         if (department) {
-            try {
-                const response = await axios.get(`${apiAddress}/communes?dep_code=${department}`); // create http get call to fetch communs list 
-            } catch (error) {
-                console.error('Error fetching communes:', error);
-            }
+            fetch(`${apiAddress}/communes?dep_code=${department}`)
+                .then(response => response.json())
+                .then(data => { setCommunes(data); console.log(communes) })
+                .catch(error => console.error('Error fetching departements:', error));
         }
     }
-    // ─────────────────────────────────────────────────────────────────────────────
 
     /*
     
@@ -96,6 +87,8 @@ const AffaireForm = () => {
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
                 </div>
 
+            {/* // ───────────────────────────────────────────────────────────────────────────── */}
+
                 {/* Similar structure repeated for other form fields... */}
                 <div className="mb-4">
                     <label htmlFor="department" className="block text-gray-700 text-sm font-bold mb-2">
@@ -111,20 +104,23 @@ const AffaireForm = () => {
                     </select>
                 </div>
 
+            {/* // ───────────────────────────────────────────────────────────────────────────── */}
 
                 <div className="mb-4">
                     <label htmlFor="commune" className="block text-gray-700 text-sm font-bold mb-2">
                         Commune
                     </label>
                     <select id="commune" value={commune}
-                        // onChange={(e) => setCommune(e.target.value)}
+                        onChange={(e) => setCommune(e.target.value)}
                         className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                         <option value="">Select a commune</option>
-                        {/* {communes.map((com, index) => (
-                            <option key={index} value={com}>{com}</option>
-                        ))} */}
+                        {communes.map((com) => (
+                            <option key={com.COM_CODE} value={com.COM_NOM}>{`${com.COM_NOM} (${com.COM_CODE})`}</option>
+                        ))}
                     </select>
                 </div>
+
+            {/* // ───────────────────────────────────────────────────────────────────────────── */}
 
                 <div className="mb-6">
                     <label htmlFor="precision" className="block text-gray-700 text-sm font-bold mb-2">
@@ -134,6 +130,8 @@ const AffaireForm = () => {
                         onChange={(e) => setPrecision(e.target.value)}
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" />
                 </div>
+
+            {/* // ───────────────────────────────────────────────────────────────────────────── */}
 
                 {/* Button with background color blue, on hover darker blue, white text, bold, padding, rounded corners, focus outline none, focus shadow outline */}
                 <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
