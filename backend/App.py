@@ -10,6 +10,7 @@ from flask_migrate import Migrate
 from models import Departement, Commune, Affaire, User, db
 
 from sqlalchemy.exc import SQLAlchemyError # to handle exception 
+from flask_cors import CORS
 
 
 # Initialize Flask application
@@ -23,6 +24,8 @@ db.init_app(app)
 # Initialize the Migrate object with the Flask app and SQLAlchemy db instance
 # This allows for easy database migrations using Flask-Migrate
 migrate = Migrate(app, db)
+
+CORS(app)
 
 
 
@@ -86,3 +89,4 @@ def hello_world():
 """
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')  # Remember to turn off debug mode in production
+
