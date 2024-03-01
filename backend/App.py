@@ -25,7 +25,8 @@ db.init_app(app)
 # This allows for easy database migrations using Flask-Migrate
 migrate = Migrate(app, db)
 
-CORS(app)
+# Replace 'http://example.com' with the actual origin of your frontend
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 
 
@@ -89,4 +90,3 @@ def hello_world():
 """
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')  # Remember to turn off debug mode in production
-

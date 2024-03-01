@@ -157,3 +157,21 @@ poetry.lock
 # Docker ignore files (if you're using Docker, you might want to exclude some files)
 Dockerfile
 .dockerignore
+
+# Dependency directories
+node_modules/
+
+# Environment variables
+.env
+
+# Build files
+build/
+dist/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
