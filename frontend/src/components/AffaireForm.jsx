@@ -79,8 +79,9 @@ const AffaireForm = () => {
                 <div className="mb-4">
                     {/* Block display, dark gray text, small text size, bold font, margin bottom */}
                     <label htmlFor="nomDeLaffaire" className="block text-gray-700 text-sm font-bold mb-2">
-                        Nom de l'Affaire
+                        Nom de l'Affaire <span className="text-red-500"> * </span>
                     </label>
+
                     {/* Full width, padding, round border, shadow, dark gray text, leading tight, focus outline none, focus shadow outline */}
                     <input type="text" id="nomDeLaffaire" value={nomDeLaffaire}
                         onChange={(e) => setNomDeLaffaire(e.target.value)}
@@ -124,7 +125,7 @@ const AffaireForm = () => {
 
                 <div className="mb-6">
                     <label htmlFor="precision" className="block text-gray-700 text-sm font-bold mb-2">
-                        Précision
+                        Précision <span className="text-red-500"> * </span>
                     </label>
                     <input type="text" id="precision" value={precision}
                         onChange={(e) => setPrecision(e.target.value)}
