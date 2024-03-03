@@ -17,7 +17,7 @@ initialize_db()
 Session = sessionmaker(bind=engine)  # Create a session class bound to the engine
 
 # Read CSV data
-df = pd.read_csv('/Users/alex/Documents/programing/flask-app-alex/backend/data/data.csv', dtype={'DEP_CODE': str, 'COM_CODE': str})
+df = pd.read_csv('/Users/alex/Documents/programing/flask-app-alex/backend/data/copy-data.csv', dtype={'DEP_CODE': str, 'COM_CODE': str})
 
 # Function to check and add departement
 def add_departement(session, dep_code, dep_nom):
