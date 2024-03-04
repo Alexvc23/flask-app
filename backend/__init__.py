@@ -1,1 +1,1 @@
-from .App import cleate_app
+from .App import create_app

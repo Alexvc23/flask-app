@@ -25,6 +25,7 @@ def create_app(cofing_class= Config):
     # Initialize the Migrate object with the Flask app and SQLAlchemy db instance
     # This allows for easy database migrations using Flask-Migrate
     migrate = Migrate(app, db)
+    
 
     # Replace 'http://example.com' with the actual origin of your frontend
     CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
