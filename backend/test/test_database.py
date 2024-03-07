@@ -1,108 +1,148 @@
-import unittest
-import pandas as pd
-from models import Departement, Commune, Affaire  # Ensure these are the models configured with Flask-SQLAlchemy
-from config.settings import TestConfig  # Import TestConfig for your test settings
-from App import create_app, db  # Correct the typo here
-from colorama import Fore, Style
+import unittest  # Importing the unittest module for creating test cases
+import pandas as pd  # Importing pandas for data manipulation
+from models import Departement, Commune, Affaire  # Importing database models
+from config.settings import TestConfig  # Importing TestConfig for test settings
+from App import create_app, db  # Importing create_app function and database instance
+from colorama import Fore, Style  # Importing colorama for colored console output
 
+# Define a test case class
 class DatabaseConnectionTest(unittest.TestCase):
+    """
 
+      ####  #        ##    ####   ####      ####   ####  #    # ###### #  ####  #    # #####    ##   ##### #  ####  #    #
+     #    # #       #  #  #      #         #    # #    # ##   # #      # #    # #    # #    #  #  #    #   # #    # ##   #
+     #      #      #    #  ####   ####     #      #    # # #  # #####  # #      #    # #    # #    #   #   # #    # # #  #
+     #      #      ######      #      #    #      #    # #  # # #      # #  ### #    # #####  ######   #   # #    # #  # #
+     #    # #      #    # #    # #    #    #    # #    # #   ## #      # #    # #    # #   #  #    #   #   # #    # #   ##
+      ####  ###### #    #  ####   ####      ####   ####  #    # #      #  ####   ####  #    # #    #   #   #  ####  #    #
+
+    """
+
+    # Set up the class (like a constructor in c++)
     @classmethod
     def setUpClass(cls):
         print(f"{Fore.BLUE}Setting up test class...{Style.RESET_ALL}")
-        cls.app = create_app(TestConfig)  # Use TestConfig here
-        cls.app_context = cls.app.app_context()
-        cls.app_context.push()
-        db.create_all()
+        cls.app = create_app(TestConfig)  # Creating the Flask app instance with test settings
+        cls.app_context = cls.app.app_context()  # Creating an application context
+        cls.app_context.push()  # Pushing the application context
+        db.create_all()  # Creating all tables in the database
         print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
 
+    # Tear down the class (like a destructor in c++)
     @classmethod
     def tearDownClass(cls):
         print(f"{Fore.BLUE}Tearing down test class...{Style.RESET_ALL}")
-        db.session.remove()
-        db.drop_all()
-        cls.app_context.pop()
+        db.session.remove()  # Removing the session
+        db.drop_all()  # Dropping all tables from the database
+        cls.app_context.pop()  # Popping the application context
         print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
 
+# ──────────────────────────────────────────────────────────────────────────────
+
+    """
+
+     ##### ######  ####  #####  ####      ####   ####  #    # ###### #  ####  #    # #####    ##   ##### #  ####  #    #  ####
+       #   #      #        #   #         #    # #    # ##   # #      # #    # #    # #    #  #  #    #   # #    # ##   # #
+       #   #####   ####    #    ####     #      #    # # #  # #####  # #      #    # #    # #    #   #   # #    # # #  #  ####
+       #   #           #   #        #    #      #    # #  # # #      # #  ### #    # #####  ######   #   # #    # #  # #      #
+       #   #      #    #   #   #    #    #    # #    # #   ## #      # #    # #    # #   #  #    #   #   # #    # #   ## #    #
+       #   ######  ####    #    ####      ####   ####  #    # #      #  ####   ####  #    # #    #   #   #  ####  #    #  ####
+
+    """
+    # Set up each individual test. (it is like a constructor for each funtion)
     def setUp(self):
         print(f"{Fore.CYAN}Setting up test...{Style.RESET_ALL}")
-        super().setUp()  # If you have this from extending a base class
-        db.session.begin_nested()  # Starts a new transaction
-        # Clear data - this is a brute-force approach and typically not necessary with transactional tests
+        super().setUp()  # Calling the parent class's setUp method
+        db.session.begin_nested()  # Starting a nested transaction
         # Commune.query.delete()
         # Departement.query.delete()
         # db.session.commit()  # Make sure the deletions are applied
 
+
+    # Tear down each individual test (it a desctructor for each function test)
     def tearDown(self):
         print(f"{Fore.CYAN}Tearing down test...{Style.RESET_ALL}")
-        db.session.rollback()  # Rollback the transaction
+        db.session.rollback()  # Rolling back the transaction
 
+# ──────────────────────────────────────────────────────────────────────────────
+    """
+
+     ##### ######  ####  #####  ####
+       #   #      #        #   #
+       #   #####   ####    #    ####
+       #   #           #   #        #
+       #   #      #    #   #   #    #
+       #   ######  ####    #    ####
+
+    """
+    # Test for department creation
     def test_01_departement_creation(self):
         print(f"{Fore.GREEN}Testing department creation...{Style.RESET_ALL}")
-        test_departement = Departement(DEP_CODE='01', DEP_NOM='Example Departement')
-        db.session.add(test_departement)
-        db.session.commit()
+        test_departement = Departement(DEP_CODE='01', DEP_NOM='Example Departement')  # Creating a test department object
+        db.session.add(test_departement)  # Adding the department to the session
+        db.session.commit()  # Committing the session
 
-        added_departement = Departement.query.filter_by(DEP_CODE='01').first()
-        print(f"{Fore.YELLOW}Added department: {added_departement}{Style.RESET_ALL}")
-        self.assertIsNotNone(added_departement)
-        self.assertEqual(added_departement.DEP_NOM, 'Example Departement')
+        added_departement = Departement.query.filter_by(DEP_CODE='01').first()  # Querying for the added department
+        print(f"{Fore.YELLOW}Added department: {added_departement}{Style.RESET_ALL}")  # Printing added department details
+        self.assertIsNotNone(added_departement)  # Asserting that the department was added
+        self.assertEqual(added_departement.DEP_NOM, 'Example Departement')  # Asserting department name
         print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
 
+    # ──────────────────────────────────────────────────────────────────────────────
 
-    # ──────────────────────────────────────────────────────────────────────
-
+    # Test for commune creation
     def test_02_commune_creation(self):
         print(f"{Fore.GREEN}Testing commune creation...{Style.RESET_ALL}")
-        # Ensure necessary Departement exists first to satisfy foreign key constraints
-        departement = Departement.query.filter_by(DEP_CODE='01').first()
+        departement = Departement.query.filter_by(DEP_CODE='01').first()  # Querying for department with code '01'
         if not departement:
             print(f"{Fore.RED}Departement not found, creating...{Style.RESET_ALL}")
-            departement = Departement(DEP_CODE='01', DEP_NOM='Example Departement')
-            db.session.add(departement)
-            db.session.commit()
+            departement = Departement(DEP_CODE='01', DEP_NOM='Example Departement')  # Creating a new department
+            db.session.add(departement)  # Adding the department to the session
+            db.session.commit()  # Committing the session
 
-        # Test creating a commune
-        test_commune = Commune(COM_CODE='01001', COM_NOM='Example Commune', DEP_CODE='01')
-        db.session.add(test_commune)
-        db.session.commit()
+        test_commune = Commune(COM_CODE='01001', COM_NOM='Example Commune', DEP_CODE='01')  # Creating a test commune
+        db.session.add(test_commune)  # Adding the commune to the session
+        db.session.commit()  # Committing the session
 
-        added_commune = Commune.query.filter_by(COM_CODE='01001').first()
-        print(f"{Fore.YELLOW}Added commune:{Style.RESET_ALL}", added_commune)
-        self.assertIsNotNone(added_commune)
-        self.assertEqual(added_commune.COM_NOM, 'Example Commune')
+        added_commune = Commune.query.filter_by(COM_CODE='01001').first()  # Querying for the added commune
+        print(f"{Fore.YELLOW}Added commune:{Style.RESET_ALL}", added_commune)  # Printing added commune details
+        self.assertIsNotNone(added_commune)  # Asserting that the commune was added
+        self.assertEqual(added_commune.COM_NOM, 'Example Commune')  # Asserting commune name
         print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
-# ──────────────────────────────────────────────────────────────────────────────
 
+    # ──────────────────────────────────────────────────────────────────────────────
+
+
+    # Test for affaire creation
     def test_03_affaire_creation(self):
         print(f"{Fore.GREEN}Testing affaire creation...{Style.RESET_ALL}")
-        # Ensure necessary Departement exists
-        departement = Departement.query.filter_by(DEP_CODE='01').first()
+        departement = Departement.query.filter_by(DEP_CODE='01').first()  # Querying for department with code '01'
         if not departement:
             print(f"{Fore.RED}Departement not found, creating...{Style.RESET_ALL}")
-            departement = Departement(DEP_CODE='01', DEP_NOM='Example Departement')
-            db.session.add(departement)
-            db.session.commit()
+            departement = Departement(DEP_CODE='01', DEP_NOM='Example Departement')  # Creating a new department
+            db.session.add(departement)  # Adding the department to the session
+            db.session.commit()  # Committing the session
 
-        # Ensure necessary Commune exists
-        commune = Commune.query.filter_by(COM_CODE='01001').first()
+        commune = Commune.query.filter_by(COM_CODE='01001').first()  # Querying for commune with code '01001'
         if not commune:
             print(f"{Fore.RED}Commune not found, creating...{Style.RESET_ALL}")
-            commune = Commune(COM_CODE='01001', COM_NOM='Example Commune', DEP_CODE='01')
-            db.session.add(commune)
-            db.session.commit()
+            commune = Commune(COM_CODE='01001', COM_NOM='Example Commune', DEP_CODE='01')  # Creating a new commune
+            db.session.add(commune)  # Adding the commune to the session
+            db.session.commit()  # Committing the session
 
-        # Now, create the Affaire instance
-        affaire = Affaire(Nom='Example Affaire', DEP_CODE='01', COM_CODE='01001', Precision='Example Details')
-        db.session.add(affaire)
-        db.session.commit()
+        affaire = Affaire(Nom='Example Affaire', DEP_CODE='01', COM_CODE='01001', Precision='Example Details')  # Creating a test affaire
+        db.session.add(affaire)  # Adding the affaire to the session
+        db.session.commit()  # Committing the session
 
-        # Verify the Affaire was added
-        added_affaire = Affaire.query.filter_by(Nom='Example Affaire').first()
-        print(f"{Fore.YELLOW}Added affaire:{Style.RESET_ALL}", added_affaire)
-        self.assertIsNotNone(added_affaire)
-        self.assertEqual(added_affaire.Precision, 'Example Details')
+        added_affaire = Affaire.query.filter_by(Nom='Example Affaire').first()  # Querying for the added affaire
+        print(f"{Fore.YELLOW}Added affaire:{Style.RESET_ALL}", added_affaire)  # Printing added affaire details
+        self.assertIsNotNone(added_affaire)  # Asserting that the affaire was added
+        self.assertEqual(added_affaire.Precision, 'Example Details')  # Asserting affaire details
         print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
 
+    # ──────────────────────────────────────────────────────────────────────────────
+
+
+# Main entry point
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main()  # Running the unittests
