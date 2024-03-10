@@ -55,7 +55,7 @@
 //     };
 
 //     // ─────────────────────────────────────────────────────────────────────
-//     const handleLocationChange = (index, field, value) => {
+//     const updateLocationChangeJSX = (index, field, value) => {
 //         const newLocations = [...locations];
 //         newLocations[index][field] = value;
 //         setLocations(newLocations);
@@ -189,61 +189,64 @@ import React, { useEffect, useState } from 'react';
 const apiAddress = "http://localhost:5000";
 
 const initialLocation = { department: '', commune: '', precision: '' };
+const initialCommunesByIndex = {communeList: [] };
 
 const AffaireForm = () => {
     const [locations, setLocations] = useState([initialLocation]);
     const [isMultipleMode, setIsMultipleMode] = useState(false);
     const [nomDeLaffaire, setNomDeLaffaire] = useState('');
     const [departments, setDepartments] = useState([]);
+    const [department, setDepartment] = useState(''); // variable to store only the department choosen by the client  (string)
     const [communes, setCommunes] = useState([]);
+    const [communesByIndex, setCommunesByIndex] = useState([initialCommunesByIndex]);
+
+    // ─────────────────────────────────────────────────────────────────────
 
     const fetchDepartments = async () => {
-        fetch(`${apiAddress}/departement`)
+        await fetch(`${apiAddress}/departement`)
             .then(response => response.json())
             .then(data => setDepartments(data))
             .catch(error => console.error('Error fetching departments:', error));
     };
 
-    useEffect(() => {
-        fetchDepartments();
-    }, []);
-
-    useEffect(() => {
-        // Check if at least one location in the locations array has a department property
-        if (locations.some(location => location.department)) {
-            // Iterate over each location in the locations array
-            locations.forEach((location, index) => {
-                // Check if the current location has a department property
-                if (location.department) {
-                    // Fetch commune data for the department from the API
-                    fetch(`${apiAddress}/communes?dep_code=${location.department}`)
-                        // Parse the response as JSON
-                        .then(response => response.json())
-                        // Handle the fetched data
-                        .then(data => {
-                            // Create a copy of the locations array to avoid mutating state directly
-                            const newLocations = [...locations];
-                            // Update the communes property of the location at the current index
-                            newLocations[index].communes = data;
-                            // Set the state with the updated locations array
-                            setLocations(newLocations);
-                        })
-                        // Handle fetch errors
-                        .catch(error => console.error('Error fetching communes:', error));
-                }
-            });
+    const fetchCommunes = async () => {
+        if (department) {
+            await fetch(`${apiAddress}/communes?dep_code=${department}`)
+                .then(response => response.json())
+                .then(data => setCommunes(data))
+                .catch(error => console.error('Error fetching departements:', error));
         }
-    }, [locations, departments]);
-    
-
-    const toggleMode = (event) => {
-        event.preventDefault();
-        setIsMultipleMode(!isMultipleMode);
     };
 
-    const handleLocationChange = (index, field, value) => {
+    const updateCommunesInLocations = async () => {
+        fetchCommunes();
+    }
+
+    const updateCommuneByIndex = (index, arrayCommunes) => {
+        // Make a copy of the communesByIndex array to avoid mutating the original state directly.
+        const updatedCommunesByIndex = [...communesByIndex];
+
+        // Update the communeList property of the object at the specified index.
+        updatedCommunesByIndex[index] = { ...updatedCommunesByIndex[index], communeList: arrayCommunes };
+
+        // Update the state with the modified array.
+        setCommunesByIndex(updatedCommunesByIndex);
+    };
+
+
+    /*  As our original data structure that holds all the colcations chosen by the client are like this:
+        [{ department: '', commune: '', precision: '' }][..]
+        the updateLocationChangeJSX function allow us to update each attibute individually, for instacen COMUNE or DEMARPTMENT */
+    const updateLocationChangeJSX = (index, field, value) => {
+
+        // Create a copy of the 'locations' array to avoid mutating the original state directly.
         const updatedLocations = [...locations];
+
+        // Update the specified location object within the copied array, first copy all the attibutes from the selected INDEX
+        // then modifies the specified field and assigs a value
         updatedLocations[index] = { ...updatedLocations[index], [field]: value };
+
+        // Set the state with the updated array of locations.
         setLocations(updatedLocations);
     };
 
@@ -251,10 +254,45 @@ const AffaireForm = () => {
         setLocations([...locations, initialLocation]);
     };
 
+    const toggleMode = (event) => {
+        event.preventDefault();
+        setIsMultipleMode(!isMultipleMode);
+    };
+
     const removeLocation = (index) => {
         const filteredLocations = locations.filter((_, idx) => idx !== index);
         setLocations(filteredLocations);
     };
+
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    // fetchs the department at the component mount life cycle
+    useEffect(() => {
+        fetchDepartments();
+    }, []);
+
+    // every time the user in the JSX chooses a department and updates the department State variable this useEffect is called
+    useEffect(() => {
+        fetchCommunes();
+    }, [department]);
+
+    //ever time communes state variable is update this ufeEffect funtion in called
+    useEffect(() => {
+        console.log(`number of comunes ${communes.length} in department ${department}`);
+    }, [communes])
+
+    useEffect(() => {
+        if (communesByIndex.some)
+        {
+            console.log(`number of elements in communesByIndex:${communesByIndex.length}`);
+            for (let i = 0; i < communesByIndex.length; i++)
+                console.log(`communesByIndex { index: ${i} COMMUNE LIST: ${communesByIndex[i].communeList}}`);
+        }
+
+    }, [communesByIndex])
+
+
+    // ─────────────────────────────────────────────────────────────────────────────
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -297,7 +335,11 @@ const AffaireForm = () => {
                             </label>
                             {/* Select input for choosing a department */}
                             <select id={`department-${index}`} value={location.department}
-                                onChange={(e) => handleLocationChange(index, 'department', e.target.value)}
+                                onChange={(e) => {
+                                    const newDepartment = e.target.value;
+                                    updateLocationChangeJSX(index, 'department', newDepartment);
+                                    setDepartment(newDepartment);
+                                }}
                                 className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                 {/* Default option for selecting a department */}
                                 <option value="">Choisissez un département</option>
@@ -316,11 +358,11 @@ const AffaireForm = () => {
                                 Commune
                             </label>
                             <select id={`commune-${index}`} value={location.commune}
-                                onChange={(e) => handleLocationChange(index, 'commune', e.target.value)}
+                                onChange={(e) => updateLocationChangeJSX(index, 'commune', e.target.value)}
                                 className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                 <option value="">Select a commune</option>
-                                {location.communes && location.communes.map((com) => (
-                                    <option key={com.COM_CODE} value={com.COM_CODE}>{com.COM_NOM}</option>
+                                {communesByIndex[index]?.communeList.map((com) => (
+                                    <option key={com.COM_CODE} value={com.COM_NOM}>{`${com.COM_NOM} (${com.COM_CODE})`}</option>
                                 ))}
                             </select>
                         </div>
@@ -332,7 +374,7 @@ const AffaireForm = () => {
                                 Précision <span className="text-red-500"> * </span>
                             </label>
                             <input type="text" id={`precision-${index}`} value={location.precision}
-                                onChange={(e) => handleLocationChange(index, 'precision', e.target.value)}
+                                onChange={(e) => updateLocationChangeJSX(index, 'precision', e.target.value)}
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" />
                         </div>
 
