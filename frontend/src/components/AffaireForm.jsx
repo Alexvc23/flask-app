@@ -202,38 +202,33 @@ const AffaireForm = () => {
 
     // ─────────────────────────────────────────────────────────────────────
 
-    const fetchDepartments = async () => {
-        await fetch(`${apiAddress}/departement`)
-            .then(response => response.json())
-            .then(data => setDepartments(data))
-            .catch(error => console.error('Error fetching departments:', error));
-    };
+    /*
 
-    const fetchCommunes = async () => {
-        if (department) {
-            await fetch(`${apiAddress}/communes?dep_code=${department}`)
-                .then(response => response.json())
-                .then(data => setCommunes(data))
-                .catch(error => console.error('Error fetching departements:', error));
-        }
-    };
+      ,,                               ,,                                    ,,           ,,        ,,
+    `7MM                             `7MM                                    db          *MM      `7MM
+      MM                               MM                                                 MM        MM
+      MM  ,pW"Wq.   ,p6"bo   ,6"Yb.    MM      `7M'   `MF',6"Yb.  `7Mb,od8 `7MM   ,6"Yb.  MM,dMMb.  MM  .gP"Ya  ,pP"Ybd
+      MM 6W'   `Wb 6M'  OO  8)   MM    MM        VA   ,V 8)   MM    MM' "'   MM  8)   MM  MM    `Mb MM ,M'   Yb 8I   `"
+      MM 8M     M8 8M        ,pm9MM    MM         VA ,V   ,pm9MM    MM       MM   ,pm9MM  MM     M8 MM 8M"""""" `YMMMa.
+      MM YA.   ,A9 YM.    , 8M   MM    MM          VVV   8M   MM    MM       MM  8M   MM  MM.   ,M9 MM YM.    , L.   I8
+    .JMML.`Ybmd9'   YMbmd'  `Moo9^Yo..JMML.         W    `Moo9^Yo..JMML.   .JMML.`Moo9^Yo.P^YbmdP'.JMML.`Mbmmd' M9mmmP'
 
-    const updateCommunesInLocations = async () => {
-        fetchCommunes();
-    }
+
+    */
 
     const updateCommuneByIndex = (index, arrayCommunes) => {
-        // Make a copy of the communesByIndex array to avoid mutating the original state directly.
         const updatedCommunesByIndex = [...communesByIndex];
-
-        // Update the communeList property of the object at the specified index.
-        updatedCommunesByIndex[index] = { ...updatedCommunesByIndex[index], communeList: arrayCommunes };
-
-        // Update the state with the modified array.
+        // Ensure arrayCommunes is always an array to avoid runtime errors.
+        updatedCommunesByIndex[index] = {
+            ...updatedCommunesByIndex[index],
+            communeList: Array.isArray(arrayCommunes) ? arrayCommunes : [],
+        };
+        // console.log('Updating communesByIndex with:', arrayCommunes);
         setCommunesByIndex(updatedCommunesByIndex);
     };
 
-
+    // ─────────────────────────────────────────────────────────────────────
+    
     /*  As our original data structure that holds all the colcations chosen by the client are like this:
         [{ department: '', commune: '', precision: '' }][..]
         the updateLocationChangeJSX function allow us to update each attibute individually, for instacen COMUNE or DEMARPTMENT */
@@ -249,7 +244,8 @@ const AffaireForm = () => {
         // Set the state with the updated array of locations.
         setLocations(updatedLocations);
     };
-
+    // ─────────────────────────────────────────────────────────────────────
+    
     const addLocation = () => {
         setLocations([...locations, initialLocation]);
     };
@@ -264,35 +260,98 @@ const AffaireForm = () => {
         setLocations(filteredLocations);
     };
 
+    /*
+
+                                                          ,,    ,,
+          db      `7MM"""Mq.`7MMF'                      `7MM  `7MM
+         ;MM:       MM   `MM. MM                          MM    MM
+        ,V^MM.      MM   ,M9  MM       ,p6"bo   ,6"Yb.    MM    MM  ,pP"Ybd
+       ,M  `MM      MMmmdM9   MM      6M'  OO  8)   MM    MM    MM  8I   `"
+       AbmmmqMA     MM        MM      8M        ,pm9MM    MM    MM  `YMMMa.
+      A'     VML    MM        MM      YM.    , 8M   MM    MM    MM  L.   I8
+    .AMA.   .AMMA..JMML.    .JMML.     YMbmd'  `Moo9^Yo..JMML..JMML.M9mmmP'
+
+
+    */ 
+    const fetchDepartments = async () => {
+        await fetch(`${apiAddress}/departement`)
+            .then(response => response.json())
+            .then(data => setDepartments(data))
+            .catch(error => console.error('Error fetching departments:', error));
+    };
+
+
+    const updateCommunesInLocations = async () => {
+        if (department) {
+            const fetchedCommunes = await fetch(`${apiAddress}/communes?dep_code=${department}`)
+                .then(response => response.json())
+                .catch(error => console.error('Error fetching communes:', error));
+            setCommunes(fetchedCommunes);  // This will trigger another useEffect or callback where you can update the communesByIndex.
+            // Ensure this runs only when new communes are fetched.
+            locations.forEach((location, idx) => {
+                if (location.department === department) {
+                    updateCommuneByIndex(idx, fetchedCommunes);
+                }
+            });
+        }
+    };
+
+
+
     // ─────────────────────────────────────────────────────────────────────────────
+    /*
+
+                                                ,...  ,...                                                                             ,,
+                                `7MM"""YMM    .d' "".d' ""                mm                                    mm                   `7MM
+                                  MM    `7    dM`   dM`                   MM                                    MM                     MM
+    `7MM  `7MM  ,pP"Ybd  .gP"Ya   MM   d     mMMmm mMMmm.gP"Ya   ,p6"bo mmMMmm      ,p6"bo   ,pW"Wq.`7MMpMMMb.mmMMmm `7Mb,od8 ,pW"Wq.  MM  ,pP"Ybd
+      MM    MM  8I   `" ,M'   Yb  MMmmMM      MM    MM ,M'   Yb 6M'  OO   MM       6M'  OO  6W'   `Wb MM    MM  MM     MM' "'6W'   `Wb MM  8I   `"
+      MM    MM  `YMMMa. 8M""""""  MM   Y  ,   MM    MM 8M"""""" 8M        MM       8M       8M     M8 MM    MM  MM     MM    8M     M8 MM  `YMMMa.
+      MM    MM  L.   I8 YM.    ,  MM     ,M   MM    MM YM.    , YM.    ,  MM       YM.    , YA.   ,A9 MM    MM  MM     MM    YA.   ,A9 MM  L.   I8
+      `Mbod"YML.M9mmmP'  `Mbmmd'.JMMmmmmMMM .JMML..JMML.`Mbmmd'  YMbmd'   `Mbmo     YMbmd'   `Ybmd9'.JMML  JMML.`Mbmo.JMML.   `Ybmd9'.JMML.M9mmmP'
+
+
+    */
 
     // fetchs the department at the component mount life cycle
     useEffect(() => {
         fetchDepartments();
     }, []);
 
-    // every time the user in the JSX chooses a department and updates the department State variable this useEffect is called
     useEffect(() => {
-        fetchCommunes();
-    }, [department]);
+        updateCommunesInLocations();
+    }, [department]); // Only re-run the effect if department changes.
+
 
     //ever time communes state variable is update this ufeEffect funtion in called
     useEffect(() => {
-        console.log(`number of comunes ${communes.length} in department ${department}`);
+        console.log(`number of comunes in department ${department}: ${communes.length}`);
     }, [communes])
 
     useEffect(() => {
         if (communesByIndex.some)
         {
             console.log(`number of elements in communesByIndex:${communesByIndex.length}`);
-            for (let i = 0; i < communesByIndex.length; i++)
-                console.log(`communesByIndex { index: ${i} COMMUNE LIST: ${communesByIndex[i].communeList}}`);
+            communesByIndex.forEach((element) => console.log(element))
         }
 
     }, [communesByIndex])
 
 
     // ─────────────────────────────────────────────────────────────────────────────
+    /*
+
+
+       `7MMF'.M"""bgd `YMM'   `MP'
+         MM ,MI    "Y   VMb.  ,P
+         MM `MMb.        `MM.M'
+         MM   `YMMNq.      MMb
+         MM .     `MM    ,M'`Mb.
+    (O)  MM Mb     dM   ,P   `MM.
+     Ymmm9  P"Ybmmd"  .MM:.  .:MMa.
+
+
+    */
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -361,7 +420,7 @@ const AffaireForm = () => {
                                 onChange={(e) => updateLocationChangeJSX(index, 'commune', e.target.value)}
                                 className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                 <option value="">Select a commune</option>
-                                {communesByIndex[index]?.communeList.map((com) => (
+                                { communesByIndex[index]?.communeList.map((com) => (
                                     <option key={com.COM_CODE} value={com.COM_NOM}>{`${com.COM_NOM} (${com.COM_CODE})`}</option>
                                 ))}
                             </select>
