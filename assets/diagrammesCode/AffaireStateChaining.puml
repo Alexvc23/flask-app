@@ -1,0 +1,21 @@
+@startuml
+actor User
+participant "React Component" as Component
+database "API" as API
+participant "useState" as State
+participant "useEffect" as Effect
+
+User -> Component: Interacts (e.g., selects a department)
+Component -> State: setDepartment(newValue)
+State --> Component: Trigger Re-render
+Component -> Effect: useEffect(department)
+Effect -> API: Fetch Communes(department)
+API --> Effect: Return Communes
+Effect -> State: setCommunes(communes)a
+State --> Component: Trigger Re-render
+Component -> State: updateCommuneByIndex(index, communes)
+State --> Component: Trigger Re-render
+
+note over Component, State: Re-render updates the UI\nbased on the new state
+
+@enduml
