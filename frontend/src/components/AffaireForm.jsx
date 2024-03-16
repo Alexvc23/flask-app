@@ -90,11 +90,19 @@ const AffaireForm = () => {
 
     */
     const fetchDepartments = async () => {
-        await fetch(`${apiAddress}/departement`)
+        fetch(`${apiAddress}/departement`)
             .then(response => response.json())
-            .then(data => setDepartments(data))
+            .then(data => {
+                if (Array.isArray(data)) { // Check if data is an array
+                    setDepartments(data);
+                } else {
+                    console.error('Fetched data is not an array:', data);
+                    setDepartments([]); // Reset to default empty array if not an array
+                }
+            })
             .catch(error => console.error('Error fetching departments:', error));
     };
+    
 
     // ─────────────────────────────────────────────────────────────────────
 
@@ -232,7 +240,6 @@ const AffaireForm = () => {
                             </select>
                         </div>
 
-                        {/* // ───────────────────────────── */}
 
                         <div className="mb-6">
                             <label htmlFor={`precision-${index}`} className="block text-gray-700 text-sm font-bold mb-2">
@@ -250,7 +257,7 @@ const AffaireForm = () => {
                                 {/* remove button */}
                                 {/* the elements in the array will be in FILA order (first in last out) */}
                                 {/* disable the Remove button for the fist element in the list as we need to have at leat one */}
-                                {index != 0 && (<button type="button" onClick={() => removeLocation(index)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                {index !== 0 && (<button type="button" onClick={() => removeLocation(index)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                                     Remove Location
                                 </button>)}
                                 {/* add location button */}
