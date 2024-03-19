@@ -58,22 +58,42 @@ const AffaireForm = () => {
     };
     // ─────────────────────────────────────────────────────────────────────
 
+    // Function: addLocation
+    // Description: This function adds a new location to the list of locations.
+    // It updates the state variable 'locations' by appending the 'initialLocation' to it.
     const addLocation = () => {
-        setLocations([...locations, initialLocation]);
+        setLocations([...locations, initialLocation]); // Spread operator is used to create a new array with the existing locations and the new initialLocation.
     };
 
     // ─────────────────────────────────────────────────────────────────────
 
+    // Function: toggleMode
+    // Description: This function toggles the mode between single and multiple modes.
+    // It takes an event object as a parameter and prevents its default behavior.
+    // Then, it toggles the value of 'isMultipleMode', which determines whether the app is in multiple mode or not.
     const toggleMode = (event) => {
-        event.preventDefault();
-        setIsMultipleMode(!isMultipleMode);
+        event.preventDefault(); // Prevents the default behavior of the event, such as form submission.
+        setIsMultipleMode(!isMultipleMode); // Toggles the value of 'isMultipleMode' using the logical NOT operator.
     };
 
     // ─────────────────────────────────────────────────────────────────────
 
+    // Function: removeLocation
+    // Description: This function removes a location from the list of locations based on the provided index.
+    // It filters out the location at the given index from the 'locations' array and updates the state variable 'locations' with the filtered array.
     const removeLocation = (index) => {
+        // 'filter' is a higher-order function available in JavaScript arrays.
+        // It creates a new array with all elements that pass the test implemented by the provided callback function.
+        // In this case, it's filtering out the location at the given 'index'.
+        // Parameters:
+        // - '_' (underscore): Represents the current value being processed in the array. Since we're not using it here, we're using '_' as a convention to indicate it's unused.
+        // - 'idx': Represents the index of the current element being processed in the array.
         const filteredLocations = locations.filter((_, idx) => idx !== index);
-        setLocations(filteredLocations);
+
+        // After filtering out the location at the given 'index', 'filteredLocations' contains all locations except the one to be removed.
+
+        // Finally, we update the 'locations' state variable with the filtered array, effectively removing the location at the specified 'index'.
+        setLocations(filteredLocations); // Updates the 'locations' state variable with the filtered array.
     };
 
     /*
@@ -102,7 +122,7 @@ const AffaireForm = () => {
             })
             .catch(error => console.error('Error fetching departments:', error));
     };
-    
+
 
     // ─────────────────────────────────────────────────────────────────────
 
@@ -119,6 +139,88 @@ const AffaireForm = () => {
                 }
             });
         }
+    };
+
+    // ─────────────────────────────────────────────────────────────────────
+
+    const handleSubmit = async (event) => {
+
+        event.prenvetDefault(); // Prevent the form from submitting in the traditional way
+
+        // ─────────────────────────────────────────────────────────────
+
+        // Construct the payload from the state
+        // Description: This code constructs a payload object using data from the application state.
+        // The payload is structured to contain information about a specific affair and its associated locations.
+        // example
+
+        /*             Payload:
+                    {
+                        nomDeLaffaire: "Affair Name",
+                        locations: [
+                            {
+                                department: "Department 1",
+                                commune: "Commune 1",
+                                precision: "Precision 1"
+                            },
+                            {
+                                department: "Department 2",
+                                commune: "Commune 2",
+                                precision: "Precision 2"
+                            },
+
+                             Additional locations can be added as needed
+                        ]
+                    } */
+
+        const payload = {
+            // 'nomDeLaffaire' represents the name/title of the affair. It is taken from the 'nomDeLaffaire' state variable.
+            nomDeLaffaire: nomDeLaffaire,
+
+            // 'locations' contains an array of objects representing the locations associated with the affair.
+            // Each object in the 'locations' array contains information about a specific location, such as department, commune, and precision.
+            // The array is constructed by mapping over the 'locations' state variable.
+
+            locations: locations.map(({ department, commune, precision }) => ({
+                department,
+                commune,
+                precision
+            }))
+        };
+        // ─────────────────────────────────────────────────────────────
+
+        // Send a Post request to the backend
+        try {
+            // Send a POST request to the server with payload data
+            // Description: This code sends a POST request to a specified API endpoint with a payload containing data from the application state.
+            // It uses the Fetch API to make an asynchronous HTTP request.
+            const response = await fetch(`${apiAddress}/my-endpoit`, {
+                method: 'POST', // Specifies the HTTP method as POST
+                headers: {
+                    'content-Type': 'application/json', // Sets the Content-Type header to indicate that the request body is JSON
+                },
+                body: JSON.stringify(payload), // Converts the payload object to a JSON string and includes it in the request body
+            });
+
+            // Check if the response from the server is successful (status code 2xx)
+            if (!response.ok) {
+                throw new Error('Network response was not ok'); // Throws an error if the response status is not ok
+            }
+
+            // If the response is successful, parse the JSON data returned by the server
+            const data = await response.json(); // Parses the JSON response body asynchronously
+            console.log('Success: ', data); // Logs the parsed data to the console, assuming the server responds with JSON
+
+            // Now clear the form and provide some input to the user
+            // Description: This section of code executes after a successful response from the server.
+            // It may include logic to clear the form fields and provide feedback to the user indicating that the request was successful.
+            // Specific implementation details for clearing the form and providing user input are not included in this snippet.
+
+        }
+        catch (error) {
+            console.error('Error: ', error);
+        }
+
     };
 
     /*
