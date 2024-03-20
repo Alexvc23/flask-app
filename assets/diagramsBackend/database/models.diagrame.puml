@@ -1,0 +1,32 @@
+@startuml
+
+package database1 <<database>>{
+    entity "Affaire" as affaires {
+    +ID : Integer
+    Nom : String
+    DEP_CODE : String
+    COM_CODE : String
+    Precision : Text
+    }
+}
+
+
+package database2 <<database>>{
+    entity "Departement" as departements {
+    DEP_CODE : String
+    DEP_NOM  : String
+    }
+}
+
+package database3 <<database>>{
+    entity "Commune" as communes {
+    +COM_CODE : String
+    COM_NOM : String
+    DEP_CODE : String
+    }
+}
+
+affaires ..> departements : "DEP_CODE"
+affaires ..> communes : "COM_CODE"
+communes ..> departements : "DEP_CODE
+@enduml
