@@ -144,8 +144,8 @@ const AffaireForm = () => {
     // ─────────────────────────────────────────────────────────────────────
 
     const handleSubmit = async (event) => {
+        event.preventDefault();
 
-        event.prenvetDefault(); // Prevent the form from submitting in the traditional way
 
         // ─────────────────────────────────────────────────────────────
 
@@ -194,7 +194,7 @@ const AffaireForm = () => {
             // Send a POST request to the server with payload data
             // Description: This code sends a POST request to a specified API endpoint with a payload containing data from the application state.
             // It uses the Fetch API to make an asynchronous HTTP request.
-            const response = await fetch(`${apiAddress}/my-endpoit`, {
+            const response = await fetch(`${apiAddress}/my-endpoint`, {
                 method: 'POST', // Specifies the HTTP method as POST
                 headers: {
                     'content-Type': 'application/json', // Sets the Content-Type header to indicate that the request body is JSON
@@ -376,7 +376,7 @@ const AffaireForm = () => {
                     </div>
                 ))}
 
-                <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110">
+                <button type="submit" onClick={handleSubmit}className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110">
                     Submit
                 </button>
             </form>
