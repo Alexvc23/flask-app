@@ -1,5 +1,30 @@
 @startuml
 
+
+package database2 <<database>>{
+    entity "Departement" as departements {
+    DEP_CODE : String
+    DEP_NOM  : String
+    }
+}
+note left of database2
+   <b>Creation order</b>
+   <size:18><b><color:red> 1 </color></b></size> 
+end note
+
+
+package database3 <<database>>{
+    entity "Commune" as communes {
+    +COM_CODE : String
+    COM_NOM : String
+    DEP_CODE : String
+    }
+}
+note left of database3
+   <b>Creation order</b>
+   <size:18><b><color:red> 2 </color></b></size> 
+end note
+
 package database1 <<database>>{
     entity "Affaire" as affaires {
     +ID : Integer
@@ -9,22 +34,13 @@ package database1 <<database>>{
     Precision : Text
     }
 }
+note left of database1
+   <b>Creation order</b>
+   <size:18><b><color:red> 3 </color></b></size> 
+end note
 
 
-package database2 <<database>>{
-    entity "Departement" as departements {
-    DEP_CODE : String
-    DEP_NOM  : String
-    }
-}
 
-package database3 <<database>>{
-    entity "Commune" as communes {
-    +COM_CODE : String
-    COM_NOM : String
-    DEP_CODE : String
-    }
-}
 
 affaires ..> departements : "DEP_CODE"
 affaires ..> communes : "COM_CODE"
