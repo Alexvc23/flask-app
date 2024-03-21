@@ -1,21 +1,15 @@
 import json
 from App import create_app, db
 from flask_testing import TestCase
+from config.settings import TestConfig  # Importing TestConfig for test settings
 from models import Affaire, Departement, Commune
 from colorama import Fore, Style
 
 class TestMyEndpoint(TestCase):
-    # Setting up test environment
-    SQLALCHEMY_DATABASE_URI = "sqlite://"
-    TESTING = True
 
     def create_app(self):
         # Creating a test Flask application
-        app = create_app(self)
-        # Setting testing environment for the app
-        app.config['TESTING'] = True
-        # Setting up database URI for testing
-        app.config['SQLALCHEMY_DATABASE_URI'] = self.SQLALCHEMY_DATABASE_URI
+        app = create_app(TestConfig)
         return app
 
     def setUp(self):
