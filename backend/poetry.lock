@@ -613,6 +613,19 @@ flask = ">=2.2.5"
 sqlalchemy = ">=2.0.16"
 
 [[package]]
+name = "flask-testing"
+version = "0.8.1"
+description = "Unit testing for Flask"
+optional = false
+python-versions = "*"
+files = [
+    {file = "Flask-Testing-0.8.1.tar.gz", hash = "sha256:0a734d7b68e63a9410b413cd7b1f96456f9a858bd09a6222d465650cc782eb01"},
+]
+
+[package.dependencies]
+Flask = "*"
+
+[[package]]
 name = "fqdn"
 version = "1.5.1"
 description = "Validates fully-qualified domain names against RFC 1123, so that they are acceptable to modern bowsers"
@@ -2653,4 +2666,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "b541ad831b81a41568dd0fcc5cdbea3bcfa54306beee7fa78192b58345471cc7"
+content-hash = "9f69d5b346dd0e2d29ede2fabbda10ab6e02b206e2c6d04271356589f4178c25"
