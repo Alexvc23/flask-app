@@ -1,0 +1,2 @@
+from .validationAffaireSchema import AffaireSchema
+from .validationAffaireSchema import LocationSchema
