@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const apiAddress = "http://localhost:5000";
 
@@ -28,6 +30,60 @@ const AffaireForm = () => {
     .JMML.`Ybmd9'   YMbmd'  `Moo9^Yo..JMML.    .JMML.  `Mbod"YML..JMML  JMML.YMbmd'   `Mbmo.JMML.`Ybmd9'.JMML  JMML.M9mmmP'
 
     */
+
+    const getResponseBody = async (response) => {
+        try {
+            // Check if the 'Content-Type' header of the response includes 'application/json'
+            if (response.headers.get('Content-Type')?.includes('application/json')) {
+                // If the 'Content-Type' is JSON, parse the response body as JSON and return it
+                return await response.json();
+            } else {
+                // If the 'Content-Type' is not JSON, read the response body as text and return it
+                return await response.text();
+            }
+        } catch (error) {
+            // If an error occurs during the process, return a generic error message
+            return "Error reading response";
+        }
+    };
+
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    function parseAndPromptUserWithErrorMessages(errorResponse) {
+        // Helper function to clean error messages
+        const cleanMessage = (message) => message.replace(/\u001b\[31m|\u001b\[0m/g, '');
+    
+        let messages = [];
+    
+        // Handle location errors
+        if (errorResponse.locations) {
+            for (const location of Object.values(errorResponse.locations)) {
+                if (location.commune) {
+                    messages.push(...location.commune.map(cleanMessage));
+                }
+                if (location.department) {
+                    messages.push(...location.department.map(cleanMessage));
+                }
+                if (location.precision) {
+                    messages.push(...location.precision.map(cleanMessage));
+                }
+            }
+        }
+    
+        // Handle "nomDeLaffaire" errors
+        if (errorResponse.nomDeLaffaire) {
+            messages.push(...errorResponse.nomDeLaffaire.map(cleanMessage));
+        }
+    
+        // Prompt user with messages
+        messages.forEach(message => {
+            toast.error(message);
+            
+        });
+    }
+    // ─────────────────────────────────────────────────────────────────────────────
+
+
     const updateCommuneByIndex = (index, arrayCommunes) => {
         const updatedCommunesByIndex = [...communesByIndex];
         // Ensure arrayCommunes is always an array to avoid runtime errors.
@@ -120,7 +176,12 @@ const AffaireForm = () => {
                     setDepartments([]); // Reset to default empty array if not an array
                 }
             })
-            .catch(error => console.error('Error fetching departments:', error));
+            .catch(error => {
+                console.error('Error fetching departments:', error);
+                toast.error('Something went wrong when fetching the department information\n\
+                please contant the system adminstrator');
+
+            });
     };
 
 
@@ -204,7 +265,9 @@ const AffaireForm = () => {
 
             // Check if the response from the server is successful (status code 2xx)
             if (!response.ok) {
-                throw new Error('Network response was not ok'); // Throws an error if the response status is not ok
+                const errorDetails = await getResponseBody(response);
+                console.log(errorDetails);
+                throw errorDetails;
             }
 
             // If the response is successful, parse the JSON data returned by the server
@@ -219,6 +282,7 @@ const AffaireForm = () => {
         }
         catch (error) {
             console.error('Error: ', error);
+            parseAndPromptUserWithErrorMessages(error);
         }
 
     };
@@ -270,24 +334,26 @@ const AffaireForm = () => {
     */
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
-            <form className="w-full max-w-lg bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <div >
-                    <button onClick={toggleMode} className={`${isMultipleMode ? 'bg-blue-500 mb-5 hover:bg-blue-700' : 'bg-green-500 mb-5 hover:bg-green-700'} text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110`}>
-                        Switch to {isMultipleMode ? 'Single' : 'Multiple'} Mode
-                    </button>
-                </div>
+        <>
+            <ToastContainer />
+            <div className="flex justify-center items-center min-h-screen bg-gray-100">
+                <form className="w-full max-w-lg bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                    <div >
+                        <button onClick={toggleMode} className={`${isMultipleMode ? 'bg-blue-500 mb-5 hover:bg-blue-700' : 'bg-green-500 mb-5 hover:bg-green-700'} text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110`}>
+                            Switch to {isMultipleMode ? 'Single' : 'Multiple'} Mode
+                        </button>
+                    </div>
 
-                <div className="mb-4">
-                    <label htmlFor="nomDeLaffaire" className="block text-gray-700 text-sm font-bold mb-2">
-                        Nom de l'Affaire <span className="text-red-500"> * </span>
-                    </label>
-                    <input type="text" id="nomDeLaffaire" value={nomDeLaffaire}
-                        onChange={(e) => setNomDeLaffaire(e.target.value)}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                </div>
+                    <div className="mb-4">
+                        <label htmlFor="nomDeLaffaire" className="block text-gray-700 text-sm font-bold mb-2">
+                            Nom de l'Affaire <span className="text-red-500"> * </span>
+                        </label>
+                        <input type="text" id="nomDeLaffaire" value={nomDeLaffaire}
+                            onChange={(e) => setNomDeLaffaire(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                    </div>
 
-                {/*
+                    {/*
                  Iterate over locations to render elements for each location
                  'location' represents the current location object 
                  'index' represents the index of the current location in the array ([i])
@@ -298,89 +364,90 @@ const AffaireForm = () => {
                  Ensure each JSX element rendered inside the map function has a unique 'key' prop
 
                  The map function returns an array of JSX elements to be rendered by React */}
-                {locations.map((location, index) => (
-                    <div key={index} className="mb-4">
+                    {locations.map((location, index) => (
+                        <div key={index} className="mb-4">
 
-                        {/* // ───────────────────────────── */}
+                            {/* // ───────────────────────────── */}
 
-                        <div className="mb-4">
-                            {/* Label for the department select input */}
-                            <label htmlFor={`department-${index}`} className="block text-gray-700 text-sm font-bold mb-2">
-                                Département
-                            </label>
-                            {/* Select input for choosing a department */}
-                            <select id={`department-${index}`} value={location.department}
-                                onChange={(e) => {
-                                    const newDepartment = e.target.value;
-                                    updateLocationChangeJSX(index, 'department', newDepartment);
-                                    setDepartment(newDepartment);
-                                }}
-                                className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                {/* Default option for selecting a department */}
-                                <option value="">Choisissez un département</option>
-                                {/* Mapping over the departments array to render options */}
-                                {departments.map((dep) => (
-                                    // Each option corresponds to a department object
-                                    <option key={dep.DEP_CODE} value={dep.DEP_CODE}>{dep.DEP_NOM}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* // ───────────────────────────── */}
-
-                        <div className="mb-4">
-                            <label htmlFor={`commune-${index}`} className="block text-gray-700 text-sm font-bold mb-2">
-                                Commune
-                            </label>
-                            <select id={`commune-${index}`} value={location.commune}
-                                onChange={(e) => updateLocationChangeJSX(index, 'commune', e.target.value)}
-                                className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                <option value="">Select a commune</option>
-                                {communesByIndex[index]?.communeList.map((com) => (
-                                    <option key={com.COM_CODE} value={com.COM_NOM}>{`${com.COM_NOM} (${com.COM_CODE})`}</option>
-                                ))}
-                            </select>
-                        </div>
-
-
-                        <div className="mb-6">
-                            <label htmlFor={`precision-${index}`} className="block text-gray-700 text-sm font-bold mb-2">
-                                Précision <span className="text-red-500"> * </span>
-                            </label>
-                            <input type="text" id={`precision-${index}`} value={location.precision}
-                                onChange={(e) => updateLocationChangeJSX(index, 'precision', e.target.value)}
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" />
-                        </div>
-
-                        {/* // ───────────────────────────── */}
-
-                        {isMultipleMode && (
-                            <div className="flex justify-between items-center">
-                                {/* remove button */}
-                                {/* the elements in the array will be in FILA order (first in last out) */}
-                                {/* disable the Remove button for the fist element in the list as we need to have at leat one */}
-                                {index !== 0 && (<button type="button" onClick={() => removeLocation(index)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                                    Remove Location
-                                </button>)}
-                                {/* add location button */}
-                                {index === locations.length - 1 && (
-                                    <button type="button" onClick={addLocation} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                                        Add Location
-                                    </button>
-                                )}
+                            <div className="mb-4">
+                                {/* Label for the department select input */}
+                                <label htmlFor={`department-${index}`} className="block text-gray-700 text-sm font-bold mb-2">
+                                    Département
+                                </label>
+                                {/* Select input for choosing a department */}
+                                <select id={`department-${index}`} value={location.department}
+                                    onChange={(e) => {
+                                        const newDepartment = e.target.value;
+                                        updateLocationChangeJSX(index, 'department', newDepartment);
+                                        setDepartment(newDepartment);
+                                    }}
+                                    className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    {/* Default option for selecting a department */}
+                                    <option value="">Choisissez un département</option>
+                                    {/* Mapping over the departments array to render options */}
+                                    {departments.map((dep) => (
+                                        // Each option corresponds to a department object
+                                        <option key={dep.DEP_CODE} value={dep.DEP_CODE}>{dep.DEP_NOM}</option>
+                                    ))}
+                                </select>
                             </div>
-                        )}
 
-                        {/* // ───────────────────────────── */}
+                            {/* // ───────────────────────────── */}
 
-                    </div>
-                ))}
+                            <div className="mb-4">
+                                <label htmlFor={`commune-${index}`} className="block text-gray-700 text-sm font-bold mb-2">
+                                    Commune
+                                </label>
+                                <select id={`commune-${index}`} value={location.commune}
+                                    onChange={(e) => updateLocationChangeJSX(index, 'commune', e.target.value)}
+                                    className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <option value="">Select a commune</option>
+                                    {communesByIndex[index]?.communeList.map((com) => (
+                                        <option key={com.COM_CODE} value={com.COM_NOM}>{`${com.COM_NOM} (${com.COM_CODE})`}</option>
+                                    ))}
+                                </select>
+                            </div>
 
-                <button type="submit" onClick={handleSubmit}className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110">
-                    Submit
-                </button>
-            </form>
-        </div>
+
+                            <div className="mb-6">
+                                <label htmlFor={`precision-${index}`} className="block text-gray-700 text-sm font-bold mb-2">
+                                    Précision <span className="text-red-500"> * </span>
+                                </label>
+                                <input type="text" id={`precision-${index}`} value={location.precision}
+                                    onChange={(e) => updateLocationChangeJSX(index, 'precision', e.target.value)}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" />
+                            </div>
+
+                            {/* // ───────────────────────────── */}
+
+                            {isMultipleMode && (
+                                <div className="flex justify-between items-center">
+                                    {/* remove button */}
+                                    {/* the elements in the array will be in FILA order (first in last out) */}
+                                    {/* disable the Remove button for the fist element in the list as we need to have at leat one */}
+                                    {index !== 0 && (<button type="button" onClick={() => removeLocation(index)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                        Remove Location
+                                    </button>)}
+                                    {/* add location button */}
+                                    {index === locations.length - 1 && (
+                                        <button type="button" onClick={addLocation} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                            Add Location
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* // ───────────────────────────── */}
+
+                        </div>
+                    ))}
+
+                    <button type="submit" onClick={handleSubmit} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110">
+                        Submit
+                    </button>
+                </form>
+            </div>
+        </>
     );
 }
 
