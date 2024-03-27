@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast , Bounce} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 const apiAddress = "http://localhost:5000";
 
@@ -287,12 +288,26 @@ const AffaireForm = () => {
             // If the response is successful, parse the JSON data returned by the server
             const data = await response.json(); // Parses the JSON response body asynchronously
             console.log('Success: ', data); // Logs the parsed data to the console, assuming the server responds with JSON
-            toast.success("L'affaire a été sauvegardé de manière satisfaisante");
-
+            // toast.success("L'affaire a été sauvegardé de manière satisfaisante");
+            toast.success("L'affaire a été sauvegardé de manière satisfaisante", {
+                position: "bottom-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
+            });
             // Now clear the form and provide some input to the user
             // Description: This section of code executes after a successful response from the server.
             // It may include logic to clear the form fields and provide feedback to the user indicating that the request was successful.
             // Specific implementation details for clearing the form and providing user input are not included in this snippet.
+
+            // Clear the form here by resetting state variables to their initial values
+            setNomDeLaffaire(''); // Assuming you have a setState function like this
+            setLocations([initialLocation]); // Assuming this is how you've structured your state for locations
 
         }
         catch (error) {
@@ -350,8 +365,8 @@ const AffaireForm = () => {
 
     return (
         <>
-            <ToastContainer />
             <div className="flex justify-center items-center min-h-screen bg-gray-100">
+                <ToastContainer />
                 <form className="w-full max-w-lg bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
                     <div >
                         <button onClick={toggleMode} className={`${isMultipleMode ? 'bg-blue-500 mb-5 hover:bg-blue-700' : 'bg-green-500 mb-5 hover:bg-green-700'} text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110`}>
