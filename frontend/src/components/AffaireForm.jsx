@@ -46,41 +46,55 @@ const AffaireForm = () => {
             return "Error reading response";
         }
     };
+    
 
     // ─────────────────────────────────────────────────────────────────────────────
 
-    function parseAndPromptUserWithErrorMessages(errorResponse) {
-        // Helper function to clean error messages
+    // This function takes an error response object as input and parses it to extract error messages, 
+    // then prompts the user with these error messages.
+
+    const parseAndPromptUserWithErrorMessages = (errorResponse) => {
+        // Helper function to clean error messages by removing ANSI escape codes
         const cleanMessage = (message) => message.replace(/\u001b\[31m|\u001b\[0m/g, '');
-    
+
+        // Array to store extracted error messages
         let messages = [];
-    
+
         // Handle location errors
         if (errorResponse.locations) {
+            // Loop through each location in the error response
             for (const location of Object.values(errorResponse.locations)) {
+                // Check if there are commune errors
                 if (location.commune) {
+                    // Add cleaned commune error messages to the messages array
                     messages.push(...location.commune.map(cleanMessage));
                 }
+                // Check if there are department errors
                 if (location.department) {
+                    // Add cleaned department error messages to the messages array
                     messages.push(...location.department.map(cleanMessage));
                 }
+                // Check if there are precision errors
                 if (location.precision) {
+                    // Add cleaned precision error messages to the messages array
                     messages.push(...location.precision.map(cleanMessage));
                 }
             }
         }
-    
+
         // Handle "nomDeLaffaire" errors
         if (errorResponse.nomDeLaffaire) {
+            // Add cleaned "nomDeLaffaire" error messages to the messages array
             messages.push(...errorResponse.nomDeLaffaire.map(cleanMessage));
         }
-    
-        // Prompt user with messages
+
+        // Prompt user with error messages
         messages.forEach(message => {
+            // Display each error message to the user using a toast notification with an error style
             toast.error(message);
-            
         });
     }
+
     // ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -273,6 +287,7 @@ const AffaireForm = () => {
             // If the response is successful, parse the JSON data returned by the server
             const data = await response.json(); // Parses the JSON response body asynchronously
             console.log('Success: ', data); // Logs the parsed data to the console, assuming the server responds with JSON
+            toast.success("L'affaire a été sauvegardé de manière satisfaisante");
 
             // Now clear the form and provide some input to the user
             // Description: This section of code executes after a successful response from the server.

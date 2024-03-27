@@ -15,7 +15,7 @@ from marshmallow import ValidationError
 from models import Departement, Commune, Affaire, db
 
 
-from validation import AffaireSchema, LocationSchema
+from validation import AffaireSchema
 
 
 from sqlalchemy.exc import SQLAlchemyError # to handle exception 
