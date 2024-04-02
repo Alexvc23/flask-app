@@ -11,6 +11,7 @@ const initialCommunesByIndex = { communeList: [] };
 const AffaireForm = () => {
     const [locations, setLocations] = useState([initialLocation]);
     const [isMultipleMode, setIsMultipleMode] = useState(false);
+    const [userName, setUserName] = useState('');
     const [nomDeLaffaire, setNomDeLaffaire] = useState('');
     const [departments, setDepartments] = useState([]);
     const [department, setDepartment] = useState(''); // variable to store only the department choosen by the client  (string)
@@ -372,7 +373,22 @@ const AffaireForm = () => {
                         <button onClick={toggleMode} className={`${isMultipleMode ? 'bg-blue-500 mb-5 hover:bg-blue-700' : 'bg-green-500 mb-5 hover:bg-green-700'} text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110`}>
                             Switch to {isMultipleMode ? 'Single' : 'Multiple'} Mode
                         </button>
+
+                    {/* // ───────────────────────────────────── */}
+                    {/* user name input  */}
+                     <div className="mb-4">
+                        <label htmlFor="userInput" className="block text-gray-700 text-sm font-bold mb-2">
+                            Nom Utilisateur <span className="text-red-500"> * </span>
+                        </label>
+                        <input type="text" id="userName" value={userName}
+                            onChange={(e) => setUserName(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
                     </div>
+
+                    {/* // ───────────────────────────────────── */}
+                    {/* Nom de l'affaire input */}
+                    
+                   </div>
 
                     <div className="mb-4">
                         <label htmlFor="nomDeLaffaire" className="block text-gray-700 text-sm font-bold mb-2">
@@ -402,7 +418,7 @@ const AffaireForm = () => {
                             <div className="mb-4">
                                 {/* Label for the department select input */}
                                 <label htmlFor={`department-${index}`} className="block text-gray-700 text-sm font-bold mb-2">
-                                    Département
+                                    Département <span className="text-red-500"> * </span>
                                 </label>
                                 {/* Select input for choosing a department */}
                                 <select id={`department-${index}`} value={location.department}
@@ -426,7 +442,7 @@ const AffaireForm = () => {
 
                             <div className="mb-4">
                                 <label htmlFor={`commune-${index}`} className="block text-gray-700 text-sm font-bold mb-2">
-                                    Commune
+                                    Commune <span className="text-red-500"> * </span>
                                 </label>
                                 <select id={`commune-${index}`} value={location.commune}
                                     onChange={(e) => updateLocationChangeJSX(index, 'commune', e.target.value)}
