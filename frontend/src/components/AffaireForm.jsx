@@ -9,14 +9,15 @@ const initialLocation = { department: '', commune: '', precision: '' };
 const initialCommunesByIndex = { communeList: [] };
 
 const AffaireForm = () => {
-    const [locations, setLocations] = useState([initialLocation]);
+    
+    const [locations, setLocations] = useState([initialLocation]); //array of dictionaries
     const [isMultipleMode, setIsMultipleMode] = useState(false);
     const [userName, setUserName] = useState('');
     const [nomDeLaffaire, setNomDeLaffaire] = useState('');
-    const [departments, setDepartments] = useState([]);
+    const [departments, setDepartments] = useState([]); // list of department by index 
     const [department, setDepartment] = useState(''); // variable to store only the department choosen by the client  (string)
     const [communes, setCommunes] = useState([]);
-    const [communesByIndex, setCommunesByIndex] = useState([initialCommunesByIndex]);
+    const [communesByIndex, setCommunesByIndex] = useState([initialCommunesByIndex]); // list of communes by index, as we have the option "Multiple mode" in the form
 
     // ─────────────────────────────────────────────────────────────────────
 
@@ -251,6 +252,8 @@ const AffaireForm = () => {
                     } */
 
         const payload = {
+
+            userName: userName,
             // 'nomDeLaffaire' represents the name/title of the affair. It is taken from the 'nomDeLaffaire' state variable.
             nomDeLaffaire: nomDeLaffaire,
 
