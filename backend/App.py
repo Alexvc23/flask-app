@@ -12,7 +12,7 @@ from flask_migrate import Migrate
 from marshmallow import ValidationError
 # Import models from the models module to ensure they are recognized by SQLAlchemy
 
-from models import Departement, Commune, Affaire, db
+from models import Departement, Commune, Affaire, User, db
 
 
 from validation import AffaireSchema
@@ -103,14 +103,19 @@ def create_app(cofing_class= Config):
             return jsonify(err.messages), 400
 
         try:
-            # Create new Affaire
+            # Create new user instace representation with the new username
+            newUser = User(username=data['userName'])
+            # Create new Affaire instace representation with the new affaire name
             new_affaire = Affaire(Nom=data['nomDeLaffaire'])
             db.session.add(new_affaire)
 
             # Iterate over locations if they exist
             for loc in data.get('locations', []):
                 # Assuming that each location must have an existing department and commune
+                #?  the department data base already exist, here we are just making sure it is an existing deparment so we can associated wo the new
+                #?  affaire we are creating
                 departement = Departement.query.filter_by(DEP_CODE=loc['department']).first()
+                #? we do the same procedure we applied to the department data base
                 commune = Commune.query.filter_by(COM_CODE=loc['commune']).first()
                 
                 if not departement or not commune:
@@ -127,7 +132,7 @@ def create_app(cofing_class= Config):
 
             # Commit the transaction
             db.session.commit()
-            sys.stderr.write("Affaire and locations saved successfully\n")
+            sys.stdout.write("Affaire and locations saved successfully\n")
             return jsonify({'success': True, 'message': 'Affaire and locations saved successfully'}), 201
 
         except Exception as e:

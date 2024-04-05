@@ -1,5 +1,5 @@
 from colorama import Fore, Style
-from marshmallow import Schema, fields, ValidationError 
+from marshmallow import Schema, fields, ValidationError, validate, validates
 import re
 
 # Define custom validation functions
@@ -16,78 +16,36 @@ import re
 
 
 """
-def validate_alpha_numeric(value):
+
+# tools
+def validate_alpha_numeric_with_space(value):
     """
-    Validates that only alphanumeric characters are present.
+    Validates that only alphanumeric characters with spaces are present.
     
     Args:
         value (str): The value to be validated.
         
     Raises:
-        ValidationError: If the value contains characters other than alphanumeric.
+        ValidationError: If the value contains characters other than alphanumeric or spaces.
     """
     print(Fore.BLUE + "Validating alpha numeric characters..." + Style.RESET_ALL)
-    if not re.match(r'^[a-zA-Z0-9]*$', value):
+    if not re.match(r'^[a-zA-Z0-9 -]*$', value):
         raise ValidationError(Fore.RED + "Value must contain only alphanumeric characters" + Style.RESET_ALL)
     # ──────────────────────────────────────────────────────────────────────
-    
-def validate_department_length(value):
-    """
-    Validates the length of the department code.
-    
-    Args:
-        value (int or str): The value to be validated.
-        
-    Raises:
-        ValidationError: If the value is not within the specified length constraints.
-    """
-    print(Fore.BLUE + "Validating department length..." + Style.RESET_ALL)
 
-    # accept only alpha numeric characters
-    validate_alpha_numeric(value)
-
-    if isinstance(value, int):
-        if not 1 <= value <= 99:
-            raise ValidationError(Fore.RED + "Department code must be an integer between 1 and 99" + Style.RESET_ALL)
-    elif isinstance(value, str):
-        if not 1 <= len(value) <= 2:
-            raise ValidationError(Fore.RED + "Department code must be a string with length between 1 and 2" + Style.RESET_ALL)
-    else:
-        raise ValidationError(Fore.RED + "Invalid type for department code" + Style.RESET_ALL)
-        # ──────────────────────────────────────────────────────────────
-
-def validate_commune_length(value):
-    """
-    Validates the length of the commune code.
-    
-    Args:
-        value (str): The value to be validated.
-        
-    Raises:
-        ValidationError: If the value is not within the specified length constraints.
-    """
-    print(Fore.BLUE + "Validating commune length..." + Style.RESET_ALL)
-    if not 1 <= len(value) <= 20:
-        raise ValidationError(Fore.RED + "Commune code must be a string with length between 1 and 20 long" + Style.RESET_ALL)
-        # ──────────────────────────────────────────────────────────────
+def validate_commune(str):
+    # validate.Length(0,20) #check length
+    validate_alpha_numeric_with_space(str)
+# ──────────────────────────────────────────────────────────────
 
 def validate_nomDeLaffaire_length(value):
-    """
-    Validates the length of the affair name.
-    
-    Args:
-        value (str): The value to be validated.
-        
-    Raises:
-        ValidationError: If the value is not within the specified length constraints.
-    """
     # accept only alpha numeric characters
-    validate_alpha_numeric(value)
+    validate_alpha_numeric_with_space(value)
 
     print(Fore.BLUE + "Validating affaire name length..." + Style.RESET_ALL)
     if not 1 <= len(value) <= 100:
         raise ValidationError(Fore.RED + "Affaire name must be a string with length between 1 and 100 characters long" + Style.RESET_ALL)
-        # ──────────────────────────────────────────────────────────────
+    # ──────────────────────────────────────────────────────────────
 
 def validate_presition_length(value):
     """
@@ -100,7 +58,7 @@ def validate_presition_length(value):
         ValidationError: If the value is not within the specified length constraints.
     """
     # accept only alpha numeric characters
-    validate_alpha_numeric(value)
+    validate_alpha_numeric_with_space(value)
 
     print(Fore.BLUE + "Validating presition field length..." + Style.RESET_ALL)
     if not 1 <= len(value) <= 400:
@@ -124,14 +82,55 @@ class LocationSchema(Schema):
     """
     Schema for the location data.
     """
-    department = fields.Field(required=True, validate=validate_department_length)  # Updated department field
-    commune = fields.String(required=True, validate=validate_commune_length)  # Updated commune field
-    precision = fields.String(required=True, validate=validate_presition_length)  # Precision is optional
+    # Validation per field
+    department = fields.String(required=True)  # Updated department field
+    commune = fields.String(required=True, validate=validate.And(validate.Length(min=1, max=30),validate_alpha_numeric_with_space))  # Updated commune field
+    precision = fields.String(required=True)  # Precision is optional
+
+    # Function in this class scope
+    # ──────────────────────────────────────────────────────────────────────
+    @validates('department') 
+    def validate_department(self, value):
+        # Attempt to convet to an integer
+        try:
+            num = int(value)
+        except ValueError:
+            raise ValidationError("Le champ 'department' doit être validé.")
+
+    # Check if it 's in the desired rang
+        if not (1 <= num <= 99):
+            raise ValidationError("La champ 'Departement' doit être un entier 1 et 99.")
+
+    # ──────────────────────────────────────────────────────────────────────
+    @validates('precision') 
+    def validate_precision(self, value):
+        validate_alpha_numeric_with_space(value)
+    # Check if it is in the desired range
+        if not (10 <= len(value) <= 400):
+          raise ValidationError("La longueur du champ 'Precision' doit être comprise entre 10 et 400.") #
 # ──────────────────────────────────────────────────────────────────────────────
 
 class AffaireSchema(Schema):
     """
     Schema for the affair data.
     """
-    nomDeLaffaire = fields.String(required=True, validate=validate_nomDeLaffaire_length)
+    userName = fields.String(required=True)
+    nomDeLaffaire = fields.String(required=True)
     locations = fields.List(fields.Nested(LocationSchema), required=True)  # Locations are optional
+
+
+    # Function in this class scope
+    # ──────────────────────────────────────────────────────────────────────
+    @validates('userName') 
+    def validate_username(self, value):
+        validate_alpha_numeric_with_space(value)
+    # Check if it is in the desired range
+        if not (5 <= len(value) <= 30):
+            raise ValidationError("La longueur du champ 'userName' doit être comprise entre 5 et 30.")
+    # ──────────────────────────────────────────────────────────────────────
+    @validates('nomDeLaffaire') 
+    def validate_nomdelaffaire(self, value):
+        validate_alpha_numeric_with_space(value)
+    # Check if it is in the desired range
+        if not (5 <= len(value) <= 50):
+            raise ValidationError("La longueur du champ 'nom de l'affaire' doit être comprise entre 5 et 50.")

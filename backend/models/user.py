@@ -1,13 +1,20 @@
-# # Define each of your models in separate files within the models directory. For example, 
-# put the User class in a file named user.py. This keeps each model encapsulated in its own space 
-# and makes your codebase more organized.
-
-# /backend/models/user.py:
+# Import necessary modules
+# For the User model:
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+
+# Import database instance
 from .base import db
 
+# Define the User model
 class User(db.Model):
+    # Set table name
     __tablename__ = 'users'
+
+    # Define columns
     id = Column(Integer, primary_key=True)
     username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
+    
+    # Define relationship to Affaire models
+    # back_populates is used to establish bidirectional relationship
+    affaires = relationship("Affaire", back_populates="user")

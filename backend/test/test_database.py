@@ -1,6 +1,6 @@
 import unittest  # Importing the unittest module for creating test cases
 import pandas as pd  # Importing pandas for data manipulation
-from models import Departement, Commune, Affaire  # Importing database models
+from models import Departement, Commune, Affaire, User  # Importing database models
 from config.settings import TestConfig  # Importing TestConfig for test settings
 from App import create_app, db  # Importing create_app function and database instance
 from colorama import Fore, Style  # Importing colorama for colored console output
@@ -75,8 +75,20 @@ class DatabaseConnectionTest(unittest.TestCase):
        #   ######  ####    #    ####
 
     """
+    # Test for user creation
+    def test_01_user_creation(self):
+        print(f"{Fore.GREEN}Testing user creation...{Style.RESET_ALL}")
+        test_user = User(id='1', username='Example username')  # Creating a test user object
+        db.session.add(test_user)  # Adding the user to the session
+        db.session.commit()  # Committing the session
+
+        added_user = User.query.filter_by(id='1').first()  # Querying for the added user
+        print(f"{Fore.YELLOW}Added user: {added_user}{Style.RESET_ALL}")  # Printing added user details
+        self.assertIsNotNone(added_user)  # Asserting that the user was added
+        self.assertEqual(added_user.username, 'Example username')  # Asserting user name
+        print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
     # Test for department creation
-    def test_01_departement_creation(self):
+    def test_02_departement_creation(self):
         print(f"{Fore.GREEN}Testing department creation...{Style.RESET_ALL}")
         test_departement = Departement(DEP_CODE='01', DEP_NOM='Example Departement')  # Creating a test department object
         db.session.add(test_departement)  # Adding the department to the session
@@ -91,7 +103,7 @@ class DatabaseConnectionTest(unittest.TestCase):
     # ──────────────────────────────────────────────────────────────────────────────
 
     # Test for commune creation
-    def test_02_commune_creation(self):
+    def test_03_commune_creation(self):
         print(f"{Fore.GREEN}Testing commune creation...{Style.RESET_ALL}")
         departement = Departement.query.filter_by(DEP_CODE='01').first()  # Querying for department with code '01'
         if not departement:
@@ -114,7 +126,7 @@ class DatabaseConnectionTest(unittest.TestCase):
 
 
     # Test for affaire creation
-    def test_03_affaire_creation(self):
+    def test_04_affaire_creation(self):
         print(f"{Fore.GREEN}Testing affaire creation...{Style.RESET_ALL}")
         departement = Departement.query.filter_by(DEP_CODE='01').first()  # Querying for department with code '01'
         if not departement:
