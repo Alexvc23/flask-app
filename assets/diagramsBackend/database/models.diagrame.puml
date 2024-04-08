@@ -31,7 +31,7 @@ package database1 <<database>>{
     Nom : String
     DEP_CODE : String
     COM_CODE : String
-    Precision : Text
+    <b>Precision</b> : Text
     }
 }
 note left of database1

@@ -90,6 +90,11 @@ const AffaireForm = () => {
             // Add cleaned "nomDeLaffaire" error messages to the messages array
             messages.push(...errorResponse.nomDeLaffaire.map(cleanMessage));
         }
+        // Handle "userName" errors
+        if (errorResponse.userName) {
+            // Add cleaned "nomDeLaffaire" error messages to the messages array
+            messages.push(...errorResponse.userName.map(cleanMessage));
+        }
 
         // Prompt user with error messages
         messages.forEach(message => {

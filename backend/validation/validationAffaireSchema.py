@@ -18,53 +18,17 @@ import re
 """
 
 # tools
-def validate_alpha_numeric_with_space(value):
+
+def validate_alpha_numeric_with_space(value, message="La valeur doit contenir uniquement des caractères alphanumériques," +
+                                      " des espaces, des tirets et des caractères accentués."):
     """
-    Validates that only alphanumeric characters with spaces are present.
-    
-    Args:
-        value (str): The value to be validated.
-        
-    Raises:
-        ValidationError: If the value contains characters other than alphanumeric or spaces.
+    Validates that only alphanumeric characters with spaces and certain accented characters are present.
     """
-    print(Fore.BLUE + "Validating alpha numeric characters..." + Style.RESET_ALL)
-    if not re.match(r'^[a-zA-Z0-9 -]*$', value):
-        raise ValidationError(Fore.RED + "Value must contain only alphanumeric characters" + Style.RESET_ALL)
-    # ──────────────────────────────────────────────────────────────────────
+    if not re.match(r'^[a-zA-Z0-9 àâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ-]*$', value):
+        raise ValidationError(message)
 
-def validate_commune(str):
-    # validate.Length(0,20) #check length
-    validate_alpha_numeric_with_space(str)
-# ──────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────────
 
-def validate_nomDeLaffaire_length(value):
-    # accept only alpha numeric characters
-    validate_alpha_numeric_with_space(value)
-
-    print(Fore.BLUE + "Validating affaire name length..." + Style.RESET_ALL)
-    if not 1 <= len(value) <= 100:
-        raise ValidationError(Fore.RED + "Affaire name must be a string with length between 1 and 100 characters long" + Style.RESET_ALL)
-    # ──────────────────────────────────────────────────────────────
-
-def validate_presition_length(value):
-    """
-    Validates the length of the precision field.
-    
-    Args:
-        value (str): The value to be validated.
-        
-    Raises:
-        ValidationError: If the value is not within the specified length constraints.
-    """
-    # accept only alpha numeric characters
-    validate_alpha_numeric_with_space(value)
-
-    print(Fore.BLUE + "Validating presition field length..." + Style.RESET_ALL)
-    if not 1 <= len(value) <= 400:
-        raise ValidationError(Fore.RED + "presition field must be a string with length between 1 and 400 characters long" + Style.RESET_ALL)
-
-# ──────────────────────────────────────────────────────────────────────────────
 """
 
                      ,,    ,,        ,,                  ,,                                  ,,
@@ -84,7 +48,7 @@ class LocationSchema(Schema):
     """
     # Validation per field
     department = fields.String(required=True)  # Updated department field
-    commune = fields.String(required=True, validate=validate.And(validate.Length(min=1, max=30),validate_alpha_numeric_with_space))  # Updated commune field
+    commune = fields.String(required=True)  # Updated commune field
     precision = fields.String(required=True)  # Precision is optional
 
     # Function in this class scope
@@ -102,13 +66,24 @@ class LocationSchema(Schema):
             raise ValidationError("La champ 'Departement' doit être un entier 1 et 99.")
 
     # ──────────────────────────────────────────────────────────────────────
+    @validates('commune') 
+    def validate_commune(self, value):
+        # Attempt to convet to an integer
+        validate_alpha_numeric_with_space("La valeur du champ 'commune' doit contenir uniquement des caractères alphanumériques," +
+                                          " des espaces, des tirets et des caractères accentués.")
+    # Check if it 's in the desired rang
+        if not (1 <= len(value) <= 30):
+            raise ValidationError("La champ 'Commune' doit être un entier 1 et 30.")
+    # ──────────────────────────────────────────────────────────────────────
     @validates('precision') 
     def validate_precision(self, value):
-        validate_alpha_numeric_with_space(value)
+        validate_alpha_numeric_with_space("La valeur du champ 'precision' doit contenir uniquement des caractères alphanumériques," +
+                                          " des espaces, des tirets et des caractères accentués.")
     # Check if it is in the desired range
         if not (10 <= len(value) <= 400):
           raise ValidationError("La longueur du champ 'Precision' doit être comprise entre 10 et 400.") #
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 class AffaireSchema(Schema):
     """
@@ -116,21 +91,23 @@ class AffaireSchema(Schema):
     """
     userName = fields.String(required=True)
     nomDeLaffaire = fields.String(required=True)
-    locations = fields.List(fields.Nested(LocationSchema), required=True)  # Locations are optional
+    locations = fields.List(fields.Nested(LocationSchema), required=True)  # Location are mandatory 
 
 
     # Function in this class scope
     # ──────────────────────────────────────────────────────────────────────
     @validates('userName') 
     def validate_username(self, value):
-        validate_alpha_numeric_with_space(value)
+        validate_alpha_numeric_with_space("La valeur du champ 'userName' doit contenir uniquement des caractères alphanumériques," +
+                                           " des espaces, des tirets et des caractères accentués.")
     # Check if it is in the desired range
         if not (5 <= len(value) <= 30):
             raise ValidationError("La longueur du champ 'userName' doit être comprise entre 5 et 30.")
     # ──────────────────────────────────────────────────────────────────────
     @validates('nomDeLaffaire') 
     def validate_nomdelaffaire(self, value):
-        validate_alpha_numeric_with_space(value)
+        validate_alpha_numeric_with_space("La valeur du champ 'nomDeLaffaire' doit contenir uniquement des caractères alphanumériques," + 
+                                          " des espaces, des tirets et des caractères accentués.")
     # Check if it is in the desired range
         if not (5 <= len(value) <= 50):
             raise ValidationError("La longueur du champ 'nom de l'affaire' doit être comprise entre 5 et 50.")
