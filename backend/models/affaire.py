@@ -12,7 +12,7 @@ class Affaire(db.Model):
 
     # Define columns
     ID = Column(Integer, primary_key=True, autoincrement=True)
-    Nom = Column(String, nullable=False)
+    Nom = Column(String, nullable=False, unique=True)
     DEP_CODE = Column(String, ForeignKey('departements.DEP_CODE'))
     COM_CODE = Column(String, ForeignKey('communes.COM_CODE'))
     Precision = Column(Text)

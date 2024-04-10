@@ -1,5 +1,5 @@
 from colorama import Fore, Style
-from marshmallow import Schema, fields, ValidationError, validate, validates
+from marshmallow import Schema, fields, ValidationError, validates
 import re
 
 # Define custom validation functions
