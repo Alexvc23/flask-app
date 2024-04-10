@@ -69,7 +69,7 @@ class LocationSchema(Schema):
     @validates('commune') 
     def validate_commune(self, value):
         # Attempt to convet to an integer
-        validate_alpha_numeric_with_space("La valeur du champ 'commune' doit contenir uniquement des caractères alphanumériques," +
+        validate_alpha_numeric_with_space(value, "La valeur du champ 'commune' doit contenir uniquement des caractères alphanumériques," +
                                           " des espaces, des tirets et des caractères accentués.")
     # Check if it 's in the desired rang
         if not (1 <= len(value) <= 30):
@@ -77,7 +77,7 @@ class LocationSchema(Schema):
     # ──────────────────────────────────────────────────────────────────────
     @validates('precision') 
     def validate_precision(self, value):
-        validate_alpha_numeric_with_space("La valeur du champ 'precision' doit contenir uniquement des caractères alphanumériques," +
+        validate_alpha_numeric_with_space(value, "La valeur du champ 'precision' doit contenir uniquement des caractères alphanumériques," +
                                           " des espaces, des tirets et des caractères accentués.")
     # Check if it is in the desired range
         if not (10 <= len(value) <= 400):
@@ -98,7 +98,7 @@ class AffaireSchema(Schema):
     # ──────────────────────────────────────────────────────────────────────
     @validates('userName') 
     def validate_username(self, value):
-        validate_alpha_numeric_with_space("La valeur du champ 'userName' doit contenir uniquement des caractères alphanumériques," +
+        validate_alpha_numeric_with_space(value, "La valeur du champ 'userName' doit contenir uniquement des caractères alphanumériques," +
                                            " des espaces, des tirets et des caractères accentués.")
     # Check if it is in the desired range
         if not (5 <= len(value) <= 30):
@@ -106,7 +106,7 @@ class AffaireSchema(Schema):
     # ──────────────────────────────────────────────────────────────────────
     @validates('nomDeLaffaire') 
     def validate_nomdelaffaire(self, value):
-        validate_alpha_numeric_with_space("La valeur du champ 'nomDeLaffaire' doit contenir uniquement des caractères alphanumériques," + 
+        validate_alpha_numeric_with_space(value, "La valeur du champ 'nomDeLaffaire' doit contenir uniquement des caractères alphanumériques," + 
                                           " des espaces, des tirets et des caractères accentués.")
     # Check if it is in the desired range
         if not (5 <= len(value) <= 50):
