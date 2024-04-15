@@ -18,7 +18,7 @@ from models import Departement, Commune, Affaire, User, db
 from validation import AffaireSchema
 
 
-from sqlalchemy.exc import SQLAlchemyError # to handle exception 
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError # to handle exception 
 
 from flask_cors import CORS
 
@@ -134,7 +134,9 @@ def create_app(cofing_class= Config):
             db.session.commit()
             sys.stdout.write("Affaire and locations saved successfully\n")
             return jsonify({'success': True, 'message': 'Affaire and locations saved successfully'}), 201
-
+        except IntegrityError:
+            db.session.rollback()
+            return jsonify({"error": "An affaire with the same name already exist"}), 400
         except Exception as e:
             db.session.rollback()
             sys.stderr.write("Error occurred during processing: {}\n".format(e))
