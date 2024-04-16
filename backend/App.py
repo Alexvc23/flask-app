@@ -106,6 +106,8 @@ def create_app(cofing_class= Config):
             # Create new user instace representation with the new username
             newUser = User(username=data['userName'])
             # Create new Affaire instace representation with the new affaire name
+            # The following link explains how error handling and data validation work for the Affaire object (model)s
+            # https://diagrams.helpful.dev/d/d:2ByVkNFB
             new_affaire = Affaire(Nom=data['nomDeLaffaire'])
             db.session.add(new_affaire)
 
