@@ -1,24 +1,11 @@
-from colorama import Fore, Style
-from marshmallow import Schema, fields, ValidationError, validates
-import re
+from colorama import Fore, Style  # Importing modules for styling (not used in provided code)
+from marshmallow import Schema, fields, ValidationError, validates  # Importing marshmallow for data validation
+import re  # Importing regular expression module
 
 # Define custom validation functions
-"""
+# ──────────────────────────────────────────────────────────────────────
 
-  ,,                               ,,          ,...                                      ,,
-`7MM                             `7MM        .d' ""                               mm     db
-  MM                               MM        dM`                                  MM
-  MM  ,pW"Wq.   ,p6"bo   ,6"Yb.    MM       mMMmm`7MM  `7MM  `7MMpMMMb.  ,p6"bo mmMMmm `7MM  ,pW"Wq.`7MMpMMMb.
-  MM 6W'   `Wb 6M'  OO  8)   MM    MM        MM    MM    MM    MM    MM 6M'  OO   MM     MM 6W'   `Wb MM    MM
-  MM 8M     M8 8M        ,pm9MM    MM        MM    MM    MM    MM    MM 8M        MM     MM 8M     M8 MM    MM
-  MM YA.   ,A9 YM.    , 8M   MM    MM        MM    MM    MM    MM    MM YM.    ,  MM     MM YA.   ,A9 MM    MM
-.JMML.`Ybmd9'   YMbmd'  `Moo9^Yo..JMML.    .JMML.  `Mbod"YML..JMML  JMML.YMbmd'   `Mbmo.JMML.`Ybmd9'.JMML  JMML.
-
-
-"""
-
-# tools
-
+# Custom validation function to validate alphanumeric characters with spaces and certain accented characters
 def validate_alpha_numeric_with_space(value, message="La valeur doit contenir uniquement des caractères alphanumériques," +
                                       " des espaces, des tirets et des caractères accentués."):
     """
@@ -29,19 +16,7 @@ def validate_alpha_numeric_with_space(value, message="La valeur doit contenir un
 
 # ──────────────────────────────────────────────────────────────────────
 
-"""
-
-                     ,,    ,,        ,,                  ,,                                  ,,
-                   `7MM    db      `7MM           mm     db                                `7MM
-                     MM              MM           MM                                         MM
-`7M'   `MF',6"Yb.    MM  `7MM   ,M""bMM   ,6"Yb.mmMMmm `7MM  ,pW"Wq.`7MMpMMMb.       ,p6"bo  MM   ,6"Yb.  ,pP"Ybd ,pP"Ybd  .gP"Ya  ,pP"Ybd
-  VA   ,V 8)   MM    MM    MM ,AP    MM  8)   MM  MM     MM 6W'   `Wb MM    MM      6M'  OO  MM  8)   MM  8I   `" 8I   `" ,M'   Yb 8I   `"
-   VA ,V   ,pm9MM    MM    MM 8MI    MM   ,pm9MM  MM     MM 8M     M8 MM    MM      8M       MM   ,pm9MM  `YMMMa. `YMMMa. 8M"""""" `YMMMa.
-    VVV   8M   MM    MM    MM `Mb    MM  8M   MM  MM     MM YA.   ,A9 MM    MM      YM.    , MM  8M   MM  L.   I8 L.   I8 YM.    , L.   I8
-     W    `Moo9^Yo..JMML..JMML.`Wbmd"MML.`Moo9^Yo.`Mbmo.JMML.`Ybmd9'.JMML  JMML.     YMbmd'.JMML.`Moo9^Yo.M9mmmP' M9mmmP'  `Mbmmd' M9mmmP'
-
-
-"""
+# Schema for the location data
 class LocationSchema(Schema):
     """
     Schema for the location data.
@@ -51,63 +26,70 @@ class LocationSchema(Schema):
     commune = fields.String(required=True)  # Updated commune field
     precision = fields.String(required=True)  # Precision is optional
 
-    # Function in this class scope
-    # ──────────────────────────────────────────────────────────────────────
+    # Custom validation for the 'department' field
     @validates('department') 
     def validate_department(self, value):
-        # Attempt to convet to an integer
+        # Attempt to convert to an integer
         try:
             num = int(value)
         except ValueError:
             raise ValidationError("Le champ 'department' doit être validé.")
 
-    # Check if it 's in the desired rang
+        # Check if it's within the desired range
         if not (1 <= num <= 99):
             raise ValidationError("La champ 'Departement' doit être un entier 1 et 99.")
 
-    # ──────────────────────────────────────────────────────────────────────
+    # Custom validation for the 'commune' field
     @validates('commune') 
     def validate_commune(self, value):
-        # Attempt to convet to an integer
+        # Validate alphanumeric characters with spaces and certain accented characters
         validate_alpha_numeric_with_space(value, "La valeur du champ 'commune' doit contenir uniquement des caractères alphanumériques," +
                                           " des espaces, des tirets et des caractères accentués.")
-    # Check if it 's in the desired rang
+        
+        # Check if it's within the desired range
         if not (1 <= len(value) <= 30):
             raise ValidationError("La champ 'Commune' doit être un entier 1 et 30.")
-    # ──────────────────────────────────────────────────────────────────────
+
+    # Custom validation for the 'precision' field
     @validates('precision') 
     def validate_precision(self, value):
+        # Validate alphanumeric characters with spaces and certain accented characters
         validate_alpha_numeric_with_space(value, "La valeur du champ 'precision' doit contenir uniquement des caractères alphanumériques," +
                                           " des espaces, des tirets et des caractères accentués.")
-    # Check if it is in the desired range
+        
+        # Check if it's within the desired range
         if not (10 <= len(value) <= 400):
-          raise ValidationError("La longueur du champ 'Precision' doit être comprise entre 10 et 400.") #
-# ──────────────────────────────────────────────────────────────────────────────
+            raise ValidationError("La longueur du champ 'Precision' doit être comprise entre 10 et 400.")
 
+# ──────────────────────────────────────────────────────────────────────
 
+# Schema for the affair data
 class AffaireSchema(Schema):
     """
     Schema for the affair data.
     """
-    userName = fields.String(required=True)
-    nomDeLaffaire = fields.String(required=True)
-    locations = fields.List(fields.Nested(LocationSchema), required=True)  # Location are mandatory 
+    userName = fields.String(required=True)  # Username field
+    nomDeLaffaire = fields.String(required=True)  # Name of the affair field
+    locations = fields.List(fields.Nested(LocationSchema), required=True)  # Location data is mandatory 
 
-
-    # Function in this class scope
-    # ──────────────────────────────────────────────────────────────────────
+    # Custom validation for the 'userName' field
     @validates('userName') 
     def validate_username(self, value):
+        # Validate alphanumeric characters with spaces and certain accented characters
         validate_alpha_numeric_with_space(value, "La valeur du champ 'userName' doit contenir uniquement des caractères alphanumériques," +
                                            " des espaces, des tirets et des caractères accentués.")
-    # Check if it is in the desired range
-        if not (5 <= len(value) <= 30):
+        
+        # Check if it's within the desired range
+        if not (3 <= len(value) <= 30):
             raise ValidationError("La longueur du champ 'userName' doit être comprise entre 5 et 30.")
-    # ──────────────────────────────────────────────────────────────────────
+
+    # Custom validation for the 'nomDeLaffaire' field
     @validates('nomDeLaffaire') 
     def validate_nomdelaffaire(self, value):
+        # Validate alphanumeric characters with spaces and certain accented characters
         validate_alpha_numeric_with_space(value, "La valeur du champ 'nomDeLaffaire' doit contenir uniquement des caractères alphanumériques," + 
                                           " des espaces, des tirets et des caractères accentués.")
-    # Check if it is in the desired range
+        
+        # Check if it's within the desired range
         if not (5 <= len(value) <= 50):
             raise ValidationError("La longueur du champ 'nom de l'affaire' doit être comprise entre 5 et 50.")
