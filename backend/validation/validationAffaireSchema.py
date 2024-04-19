@@ -54,8 +54,6 @@ class LocationSchema(Schema):
     @validates('precision') 
     def validate_precision(self, value):
         # Validate alphanumeric characters with spaces and certain accented characters
-        validate_alpha_numeric_with_space(value, "La valeur du champ 'precision' doit contenir uniquement des caractères alphanumériques," +
-                                          " des espaces, des tirets et des caractères accentués.")
         
         # Check if it's within the desired range
         if not (10 <= len(value) <= 400):
