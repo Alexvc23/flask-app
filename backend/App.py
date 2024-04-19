@@ -97,17 +97,20 @@ def create_app(cofing_class= Config):
         try:
             #validate the data against the schema
             data = affaire_schema.load(json_data)
+            print(f"receiving data from Fronted: {data}")
             sys.stderr.write("Received data: {}\n".format(data))  # Add a print statement to log received data
         except ValidationError as err:
             # Return validation errors 
             return jsonify(err.messages), 400
 
         try:
+            # The following link explains how error handling for the Affaire object (model)s
+            # https://diagrams.helpful.dev/d/d:2ByVkNFB
+
             # Create new user instace representation with the new username
             newUser = User(username=data['userName'])
+            db.session.add(newUser)
             # Create new Affaire instace representation with the new affaire name
-            # The following link explains how error handling and data validation work for the Affaire object (model)s
-            # https://diagrams.helpful.dev/d/d:2ByVkNFB
             new_affaire = Affaire(Nom=data['nomDeLaffaire'])
             db.session.add(new_affaire)
 
@@ -136,12 +139,19 @@ def create_app(cofing_class= Config):
             db.session.commit()
             sys.stdout.write("Affaire and locations saved successfully\n")
             return jsonify({'success': True, 'message': 'Affaire and locations saved successfully'}), 201
-        except IntegrityError:
-            db.session.rollback()
-            return jsonify({"error": "An affaire with the same name already exist"}), 400
+        except IntegrityError as e:
+                db.session.rollback()
+                error_info = str(e.__cause__)
+                sys.stderr.write(f"IntegrityError occurred: {error_info}\n")
+                if 'affaires_Nom_key' in error_info:
+                    return jsonify({"error": "An affaire with the same name already exists"}), 400
+                elif 'users_username_key' in error_info:
+                    return jsonify({"error": "A user with the same username already exists"}), 400
+                else:
+                    return jsonify({"error": "A database integrity issue occurred"}), 400
         except Exception as e:
             db.session.rollback()
-            sys.stderr.write("Error occurred during processing: {}\n".format(e))
+            sys.stderr.write(f"Error occurred during processing: {e}\n")
             return jsonify({'error': 'Server error', 'message': str(e)}), 500
 
 
