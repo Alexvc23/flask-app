@@ -14,9 +14,7 @@ from marshmallow import ValidationError
 
 from models import Departement, Commune, Affaire, User, Location, db
 
-
 from validation import AffaireSchema
-
 
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError # to handle exception 
 
@@ -85,74 +83,52 @@ def create_app(cofing_class= Config):
         except SQLAlchemyError as e:
             # Log the exception here
             return jsonify(error="Database error occurred"), 500
-    # ──────────────────────────────────────────────────────────────────────
 
+    # ──────────────────────────────────────────────────────────────────────
 
     @app.route('/my-endpoint', methods=['POST'])
     def create_affaire():
-        # Create an instance of the AffaireSchema
         json_data = request.get_json()
-        # inicilise an instace of the data validator
         affaire_schema = AffaireSchema()
+
         try:
-            #validate the data against the schema
             data = affaire_schema.load(json_data)
-            print(f"receiving data from Fronted: {data}")
-            sys.stderr.write("Received data: {}\n".format(data))  # Add a print statement to log received data
         except ValidationError as err:
-            # Return validation errors 
             return jsonify(err.messages), 400
 
         try:
-            # The following link explains how error handling for the Affaire object (model)s
-            # https://diagrams.helpful.dev/d/d:2ByVkNFB
+            user = User.query.filter_by(username=data['userName']).first()
+            if not user:
+                user = User(username=data['userName'])
+                db.session.add(user)
 
-            # Create new user instace representation with the new username
-            newUser = User(username=data['userName'])
-            db.session.add(newUser)
-            # Create new Affaire instace representation with the new affaire name
-            new_affaire = Affaire(Nom=data['nomDeLaffaire'])
-            db.session.add(new_affaire)
+            new_affaire = Affaire(nom=data['nomDeLaffaire'], user=user)
+            db.session.add(new_affaire)  # Make sure to add the new affaire to the session here
 
-            # Iterate over locations if they exist
             for loc in data.get('locations', []):
-                # Assuming that each location must have an existing department and commune
-                #?  the department data base already exist, here we are just making sure it is an existing deparment so we can associated wo the new
-                #?  affaire we are creating
                 departement = Departement.query.filter_by(DEP_CODE=loc['department']).first()
-                #? we do the same procedure we applied to the department data base
                 commune = Commune.query.filter_by(COM_NOM=loc['commune']).first()
-                print(f"Department: ${departement} \nCommune ${commune}")
-                
                 if not departement or not commune:
-                    # One way to handle this could be to skip the locations with missing data,
-                    # or you could return an error - depends on your business logic.
-                    sys.stderr.write("Missing department or commune data for location: {}\n".format(loc))
-                    continue
+                    return jsonify({"error": "Missing department or commune data"}), 400
 
-                # Associate the affaire with the departement and commune
-                # This assumes your Affaire model can directly link to Departement and Commune
-                new_affaire.DEP_CODE = departement.DEP_CODE
-                new_affaire.COM_CODE = commune.COM_CODE
-                # Add more logic as needed to correctly associate the data
+                new_location = Location(department=loc['department'], commune=loc['commune'], precision=loc['precision'], affaire=new_affaire)
+                db.session.add(new_location)
 
-            # Commit the transaction
             db.session.commit()
-            sys.stdout.write("Affaire and locations saved successfully\n")
             return jsonify({'success': True, 'message': 'Affaire and locations saved successfully'}), 201
+
         except IntegrityError as e:
-                db.session.rollback()
-                error_info = str(e.__cause__)
-                sys.stderr.write(f"IntegrityError occurred: {error_info}\n")
-                if 'affaires_Nom_key' in error_info:
-                    return jsonify({"error": "An affaire with the same name already exists"}), 400
-                elif 'users_username_key' in error_info:
-                    return jsonify({"error": "A user with the same username already exists"}), 400
-                else:
-                    return jsonify({"error": "A database integrity issue occurred"}), 400
+            db.session.rollback()
+            error_info = str(e.__cause__)
+            if 'uix_nom_user_id' in error_info:
+                return jsonify({"error": "Une affaire avec le même nom existe déjà pour cet utilisateur"}), 400
+            elif 'users_username_key' in error_info:
+                return jsonify({"error": "Un utilisateur avec le même nom d'utilisateur existe déjà"}), 400
+            return jsonify({"error": "Un problème d'intégrité de la base de données s'est produit"}), 400
+
+
         except Exception as e:
             db.session.rollback()
-            sys.stderr.write(f"Error occurred during processing: {e}\n")
             return jsonify({'error': 'Server error', 'message': str(e)}), 500
 
 
