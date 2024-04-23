@@ -1,160 +1,188 @@
-import unittest  # Importing the unittest module for creating test cases
-import pandas as pd  # Importing pandas for data manipulation
-from models import Departement, Commune, Affaire, User  # Importing database models
-from config.settings import TestConfig  # Importing TestConfig for test settings
-from App import create_app, db  # Importing create_app function and database instance
-from colorama import Fore, Style  # Importing colorama for colored console output
+import unittest
+import pandas as pd
 
-# Define a test case class
+# Importing models from your application
+from models import User, Affaire, Location, Departement, Commune
+
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError # to handle exception 
+
+# Importing test configuration and application setup
+from config.settings import TestConfig
+from App import create_app, db
+
+# Importing colorama for colored terminal output
+from colorama import Fore, Style
+
+# Defining a test class inheriting from unittest.TestCase
 class DatabaseConnectionTest(unittest.TestCase):
-    """
 
-      ####  #        ##    ####   ####      ####   ####  #    # ###### #  ####  #    # #####    ##   ##### #  ####  #    #
-     #    # #       #  #  #      #         #    # #    # ##   # #      # #    # #    # #    #  #  #    #   # #    # ##   #
-     #      #      #    #  ####   ####     #      #    # # #  # #####  # #      #    # #    # #    #   #   # #    # # #  #
-     #      #      ######      #      #    #      #    # #  # # #      # #  ### #    # #####  ######   #   # #    # #  # #
-     #    # #      #    # #    # #    #    #    # #    # #   ## #      # #    # #    # #   #  #    #   #   # #    # #   ##
-      ####  ###### #    #  ####   ####      ####   ####  #    # #      #  ####   ####  #    # #    #   #   #  ####  #    #
-
-    """
-
-    # Set up the class (like a constructor in c++)
+    # Setting up class-level resources before any tests are run
     @classmethod
     def setUpClass(cls):
         print(f"{Fore.BLUE}Setting up test class...{Style.RESET_ALL}")
-        cls.app = create_app(TestConfig)  # Creating the Flask app instance with test settings
-        cls.app_context = cls.app.app_context()  # Creating an application context
-        cls.app_context.push()  # Pushing the application context
-        db.create_all()  # Creating all tables in the database
+
+        # Creating the Flask application with the test configuration
+        cls.app = create_app(TestConfig)
+        cls.app_context = cls.app.app_context()
+        cls.app_context.push()
+        # Creating all database tables
+        db.create_all() 
+        # Printing separator for clarity
         print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
 
-    # Tear down the class (like a destructor in c++)
+    # Tearing down class-level resources after all tests have been run
     @classmethod
     def tearDownClass(cls):
         print(f"{Fore.BLUE}Tearing down test class...{Style.RESET_ALL}")
-        db.session.remove()  # Removing the session
-        db.drop_all()  # Dropping all tables from the database
-        cls.app_context.pop()  # Popping the application context
+
+        # Removing the application context
+        # Dropping all database tables
+        db.drop_all()
+        db.session.remove()
+        cls.app_context.pop()
+
+        # Printing separator for clarity
         print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
 
-# ──────────────────────────────────────────────────────────────────────────────
+    # ──────────────────────────────────────────────────────────────
 
-    """
-
-     ##### ######  ####  #####  ####      ####   ####  #    # ###### #  ####  #    # #####    ##   ##### #  ####  #    #  ####
-       #   #      #        #   #         #    # #    # ##   # #      # #    # #    # #    #  #  #    #   # #    # ##   # #
-       #   #####   ####    #    ####     #      #    # # #  # #####  # #      #    # #    # #    #   #   # #    # # #  #  ####
-       #   #           #   #        #    #      #    # #  # # #      # #  ### #    # #####  ######   #   # #    # #  # #      #
-       #   #      #    #   #   #    #    #    # #    # #   ## #      # #    # #    # #   #  #    #   #   # #    # #   ## #    #
-       #   ######  ####    #    ####      ####   ####  #    # #      #  ####   ####  #    # #    #   #   #  ####  #    #  ####
-
-    """
-    # Set up each individual test. (it is like a constructor for each funtion)
+    # Setting up resources before each test method
     def setUp(self):
         print(f"{Fore.CYAN}Setting up test...{Style.RESET_ALL}")
-        super().setUp()  # Calling the parent class's setUp method
-        db.session.begin_nested()  # Starting a nested transaction
-        # Commune.query.delete()
-        # Departement.query.delete()
-        # db.session.commit()  # Make sure the deletions are applied
+        super().setUp()
 
+        # Starting a nested transaction
+        db.session.begin_nested()
 
-    # Tear down each individual test (it a desctructor for each function test)
+    # Tearing down resources after each test method
     def tearDown(self):
         print(f"{Fore.CYAN}Tearing down test...{Style.RESET_ALL}")
-        db.session.rollback()  # Rolling back the transaction
 
-# ──────────────────────────────────────────────────────────────────────────────
-    """
+        # Rolling back the nested transaction to discard changes made during the test
+        db.session.rollback()
 
-     ##### ######  ####  #####  ####
-       #   #      #        #   #
-       #   #####   ####    #    ####
-       #   #           #   #        #
-       #   #      #    #   #   #    #
-       #   ######  ####    #    ####
-
-    """
-    # Test for user creation
-    def test_01_user_creation(self):
+    # Test method for user creation
+    def test_user_creation(self):
         print(f"{Fore.GREEN}Testing user creation...{Style.RESET_ALL}")
-        test_user = User(id='1', username='Example username')  # Creating a test user object
-        db.session.add(test_user)  # Adding the user to the session
-        db.session.commit()  # Committing the session
-
-        added_user = User.query.filter_by(id='1').first()  # Querying for the added user
-        print(f"{Fore.YELLOW}Added user: {added_user}{Style.RESET_ALL}")  # Printing added user details
-        self.assertIsNotNone(added_user)  # Asserting that the user was added
-        self.assertEqual(added_user.username, 'Example username')  # Asserting user name
-        print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
-    # Test for department creation
-    def test_02_departement_creation(self):
-        print(f"{Fore.GREEN}Testing department creation...{Style.RESET_ALL}")
-        test_departement = Departement(DEP_CODE='01', DEP_NOM='Example Departement')  # Creating a test department object
-        db.session.add(test_departement)  # Adding the department to the session
-        db.session.commit()  # Committing the session
-
-        added_departement = Departement.query.filter_by(DEP_CODE='01').first()  # Querying for the added department
-        print(f"{Fore.YELLOW}Added department: {added_departement}{Style.RESET_ALL}")  # Printing added department details
-        self.assertIsNotNone(added_departement)  # Asserting that the department was added
-        self.assertEqual(added_departement.DEP_NOM, 'Example Departement')  # Asserting department name
+        existing_user = User.query.filter_by(username='tony').first()
+        if not existing_user:
+            test_user = User(username='tony')
+            db.session.add(test_user)
+            db.session.commit()
+            added_user = User.query.filter_by(username='tony').first()
+            self.assertIsNotNone(added_user)
+            self.assertEqual(added_user.username, 'tony')
+        else:
+            print(f"{Fore.YELLOW}User already exists, skipping insert.{Style.RESET_ALL}")
         print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
 
-    # ──────────────────────────────────────────────────────────────────────────────
+   # ──────────────────────────────────────────────────────────────
 
-    # Test for commune creation
-    def test_03_commune_creation(self):
-        print(f"{Fore.GREEN}Testing commune creation...{Style.RESET_ALL}")
-        departement = Departement.query.filter_by(DEP_CODE='01').first()  # Querying for department with code '01'
-        if not departement:
-            print(f"{Fore.RED}Departement not found, creating...{Style.RESET_ALL}")
-            departement = Departement(DEP_CODE='01', DEP_NOM='Example Departement')  # Creating a new department
-            db.session.add(departement)  # Adding the department to the session
-            db.session.commit()  # Committing the session
+    # Test method for affaire and location creation
+    def test_affaire_and_location_creation(self):
+        print(f"{Fore.GREEN}Testing affaire and location creation...{Style.RESET_ALL}")
 
-        test_commune = Commune(COM_CODE='01001', COM_NOM='Example Commune', DEP_CODE='01')  # Creating a test commune
-        db.session.add(test_commune)  # Adding the commune to the session
-        db.session.commit()  # Committing the session
+        # Creating a test user
+        user = User(username='alex')
+        db.session.add(user)
+        db.session.commit()
 
-        added_commune = Commune.query.filter_by(COM_CODE='01001').first()  # Querying for the added commune
-        print(f"{Fore.YELLOW}Added commune:{Style.RESET_ALL}", added_commune)  # Printing added commune details
-        self.assertIsNotNone(added_commune)  # Asserting that the commune was added
-        self.assertEqual(added_commune.COM_NOM, 'Example Commune')  # Asserting commune name
+        # Creating a test affaire associated with the user
+        affaire = Affaire(nom='alexTest', user=user)
+        db.session.add(affaire)
+        db.session.commit()
+
+        # Defining test locations data
+        locations = [
+            {'department': '72', 'commune': 'Aviernoz', 'precision': 'precision1'},
+            {'department': '71', 'commune': 'Berzé-le-Châtel', 'precision': 'precision2'}
+        ]
+
+        # Iterating over the test locations and creating them
+        for loc in locations:
+            location = Location(department=loc['department'], commune=loc['commune'], precision=loc['precision'], affaire=affaire)
+            db.session.add(location)
+        db.session.commit()
+
+        # Querying the added affaire from the database
+        added_affaire = Affaire.query.filter_by(nom='alexTest').first()
+
+        # Asserting and printing details
+        self.assertIsNotNone(added_affaire)
+        self.assertEqual(len(added_affaire.locations), 2)
+        self.assertEqual(added_affaire.locations[0].precision, 'precision1')
+        self.assertEqual(added_affaire.locations[1].precision, 'precision2')
+        print(f"{Fore.YELLOW}Added affaire and locations: {added_affaire}{Style.RESET_ALL}")
+        for loc in added_affaire.locations:
+            print(f"{Fore.GREEN}Location - Department: {loc.department}, Commune: {loc.commune}, Precision: {loc.precision}{Style.RESET_ALL}")
         print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
 
-    # ──────────────────────────────────────────────────────────────────────────────
+    # Affaire uniqueness with different users
+    def test_affaire_uniqueness(self):
+        print(f"{Fore.GREEN}Testing affaire uniqueness...{Style.RESET_ALL}")
+        user1 = User(username='user1')
+        user2 = User(username='user2')
+        db.session.add(user1)
+        db.session.add(user2)
+        db.session.commit()
 
+        affaire1 = Affaire(nom='uniqueTest', user=user1)
+        affaire2 = Affaire(nom='uniqueTest', user=user2)
+        db.session.add(affaire1)
+        db.session.add(affaire2)
+        db.session.commit()
 
-    # Test for affaire creation
-    def test_04_affaire_creation(self):
-        print(f"{Fore.GREEN}Testing affaire creation...{Style.RESET_ALL}")
-        departement = Departement.query.filter_by(DEP_CODE='01').first()  # Querying for department with code '01'
-        if not departement:
-            print(f"{Fore.RED}Departement not found, creating...{Style.RESET_ALL}")
-            departement = Departement(DEP_CODE='01', DEP_NOM='Example Departement')  # Creating a new department
-            db.session.add(departement)  # Adding the department to the session
-            db.session.commit()  # Committing the session
+        # Expect both affaires to be added without issues if uniqueness is scoped to user
+        self.assertEqual(Affaire.query.filter_by(nom='uniqueTest').count(), 2)
+        print(f"{Fore.YELLOW}Tested uniqueness of affaire name across different users.{Style.RESET_ALL}")
 
-        commune = Commune.query.filter_by(COM_CODE='01001').first()  # Querying for commune with code '01001'
-        if not commune:
-            print(f"{Fore.RED}Commune not found, creating...{Style.RESET_ALL}")
-            commune = Commune(COM_CODE='01001', COM_NOM='Example Commune', DEP_CODE='01')  # Creating a new commune
-            db.session.add(commune)  # Adding the commune to the session
-            db.session.commit()  # Committing the session
+    #single user affaire uniqueness, as the user should have uniqueness contrain in terms of affaire name 
+    def test_affaire_uniqueness_within_single_user(self):
+        print(f"{Fore.GREEN}Testing affaire uniqueness within a single user...{Style.RESET_ALL}")
+        user = User(username='unique_user')
+        db.session.add(user)
+        db.session.commit()
 
-        affaire = Affaire(Nom='Example Affaire', DEP_CODE='01', COM_CODE='01001', Precision='Example Details')  # Creating a test affaire
-        db.session.add(affaire)  # Adding the affaire to the session
-        db.session.commit()  # Committing the session
+        # Attempt to create two affaires with the same name for the same user
+        affaire1 = Affaire(nom='duplicateTest', user=user)
+        affaire2 = Affaire(nom='duplicateTest', user=user)
+        db.session.add(affaire1)
+        db.session.add(affaire2)
 
-        added_affaire = Affaire.query.filter_by(Nom='Example Affaire').first()  # Querying for the added affaire
-        print(f"{Fore.YELLOW}Added affaire:{Style.RESET_ALL}", added_affaire)  # Printing added affaire details
-        self.assertIsNotNone(added_affaire)  # Asserting that the affaire was added
-        self.assertEqual(added_affaire.Precision, 'Example Details')  # Asserting affaire details
+        # Expecting an IntegrityError on commit because of the unique constraint
+        with self.assertRaises(IntegrityError):
+            db.session.commit()
+        print(f"{Fore.YELLOW}Passing by IntegityError after tryting to add the same affaire name with the same user.{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}Tested uniqueness of affaire name within the same user.{Style.RESET_ALL}")
+        db.session.rollback()  # Cleanup after expected failure
+
+        # Checking if there is nothing in the data base as a error was raised and the rollback was applied 
+        count = Affaire.query.filter_by(nom='duplicateTest', user_id=user.id).count()
+        self.assertEqual(count, 0, "No affaire should be present due to rollback after failed uniqueness test")
+        print(f" number of affaires: ${count} with user ${user.username} ")
         print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
 
-    # ──────────────────────────────────────────────────────────────────────────────
+
+    # Testing adding multiple users and multiple affaires
+    def test_multiple_users_affaires(self):
+        print(f"{Fore.GREEN}Testing multiple affaires for different users...{Style.RESET_ALL}")
+        users = [User(username='charlie'), User(username='dave')]
+        db.session.add_all(users)
+        db.session.commit()  # Ensure users are committed before using them
+
+        affaires = [Affaire(nom=f'Project {u.username}', user=u) for u in User.query.all()]  # Fetch fresh from the DB
+        db.session.add_all(affaires)
+        db.session.commit()
+
+        for a in affaires:
+            added = Affaire.query.filter_by(nom=a.nom).first()
+            self.assertIsNotNone(added)
+            self.assertEqual(added.user.username, a.user.username)
+            print(f"{Fore.YELLOW}Added {added.nom} for {added.user.username}{Style.RESET_ALL}")
+
+        print(f"{Fore.YELLOW}--------------------------------------------------{Style.RESET_ALL}")
 
 
-# Main entry point
+# Running the tests if this script is executed directly
 if __name__ == '__main__':
-    unittest.main()  # Running the unittests
+    unittest.main()

@@ -12,7 +12,7 @@ from flask_migrate import Migrate
 from marshmallow import ValidationError
 # Import models from the models module to ensure they are recognized by SQLAlchemy
 
-from models import Departement, Commune, Affaire, User, db
+from models import Departement, Commune, Affaire, User, Location, db
 
 
 from validation import AffaireSchema
@@ -121,7 +121,8 @@ def create_app(cofing_class= Config):
                 #?  affaire we are creating
                 departement = Departement.query.filter_by(DEP_CODE=loc['department']).first()
                 #? we do the same procedure we applied to the department data base
-                commune = Commune.query.filter_by(COM_CODE=loc['commune']).first()
+                commune = Commune.query.filter_by(COM_NOM=loc['commune']).first()
+                print(f"Department: ${departement} \nCommune ${commune}")
                 
                 if not departement or not commune:
                     # One way to handle this could be to skip the locations with missing data,

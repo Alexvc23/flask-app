@@ -1,32 +1,22 @@
-# Import necessary modules
+# Importing necessary modules for defining the model
 from sqlalchemy import Column, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy.schema import UniqueConstraint
 
-# Import database instance
+# Importing the database instance
 from .base import db
 
-# Define the Affaire model
+# Defining the Affaire model, inheriting from db.Model which represents a table in the database
 class Affaire(db.Model):
-    # Set table name
-    __tablename__ = 'affaires'
+    # Defining columns for the Affaire table
+    id = db.Column(db.Integer, primary_key=True)  # Primary key column for uniquely identifying each Affaire
+    nom = db.Column(db.String(100), nullable=False)  # Column to store the name of the Affaire, cannot be null
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Foreign key column referencing the User table, cannot be null
 
-    # Define columns
-    ID = Column(Integer, primary_key=True, autoincrement=True)
-    Nom = Column(String, nullable=False, unique=True)
-    DEP_CODE = Column(String, ForeignKey('departements.DEP_CODE'))
-    COM_CODE = Column(String, ForeignKey('communes.COM_CODE'))
-    Precision = Column(Text)
-    
-    # Define foreign key to link to the User model
-    user_id = Column(Integer, ForeignKey('users.id'))
-    
-    # Define relationships
-    departement = relationship("Departement")
-    commune = relationship("Commune")
-    
-    # Define the back relationship to User
-    user = relationship("User", back_populates="affaires")
+    # Defining a relationship with the Location model, each Affaire can have multiple locations
+    locations = db.relationship('Location', backref='affaire', lazy=True, cascade="all, delete-orphan")
 
-    # Define representation of the object
-    def __repr__(self):
-        return f"<Affaire(Nom='{self.Nom}', DEP_CODE='{self.DEP_CODE}', COM_CODE='{self.COM_CODE}', Precision='{self.Precision}', UserID='{self.user_id}')>"
+    # Defining additional table constraints, in this case, a unique constraint on 'nom' and 'user_id' combination
+    __table_args__ = (
+        UniqueConstraint('nom', 'user_id', name='uix_nom_user_id'),  # Ensures that each (nom, user_id) combination is unique
+    )

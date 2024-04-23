@@ -1,20 +1,16 @@
-# Import necessary modules
-# For the User model:
-from sqlalchemy import Column, Integer, String
+# Importing necessary modules for defining the model
+from sqlalchemy import Column, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
 
-# Import database instance
+# Importing the database instance
 from .base import db
 
-# Define the User model
+# Define the User model, inheriting from db.Model which represents a table in the database
 class User(db.Model):
-    # Set table name
-    __tablename__ = 'users'
+    # Defining columns for the User table
+    id = Column(Integer, primary_key=True)  # Primary key column for uniquely identifying each User
+    username = Column(String(50), unique=True, nullable=False)  # Column to store the username, must be unique and cannot be null
 
-    # Define columns
-    id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    
-    # Define relationship to Affaire models
-    # back_populates is used to establish bidirectional relationship
-    affaires = relationship("Affaire", back_populates="user")
+    # Defining a relationship with the Affaire model, each User can have multiple affaires
+    affaires = relationship('Affaire', backref='user', lazy=True, cascade="all, delete-orphan")
+

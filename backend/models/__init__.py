@@ -7,3 +7,4 @@ from .departement import Departement
 from .commune import Commune
 from .affaire import Affaire
 from .user import User
+from .locations import Location
