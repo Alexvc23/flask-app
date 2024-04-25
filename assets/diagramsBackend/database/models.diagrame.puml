@@ -1,48 +1,62 @@
 @startuml
 
+package "Database Schema" <<database>> {
 
-package database2 <<database>>{
+    entity "User" as user {
+        +id : Integer
+        username : String
+    }
+    note right of user
+       <b>Creation order</b>
+       <size:18><b><color:red>1</color></b></size>
+    end note
+
+    entity "Affaire" as affaire {
+        +id : Integer
+        nom : String
+        user_id : Integer
+    }
+    note right of affaire
+       <b>Creation order</b>
+       <size:18><b><color:red>2</color></b></size>
+    end note
+
+    entity "Location" as location {
+        +id : Integer
+        department : String
+        commune : String
+        precision : Text
+        affaire_id : Integer
+    }
+    note right of location
+       <b>Creation order</b>
+       <size:18><b><color:red>3</color></b></size>
+    end note
+
     entity "Departement" as departements {
-    DEP_CODE : String
-    DEP_NOM  : String
+        DEP_CODE : String
+        DEP_NOM  : String
     }
-}
-note left of database2
-   <b>Creation order</b>
-   <size:18><b><color:red> 1 </color></b></size> 
-end note
+    note right of departements
+       <b>Creation order</b>
+       <size:18><b><color:red>4</color></b></size>
+    end note
 
-
-package database3 <<database>>{
     entity "Commune" as communes {
-    +COM_CODE : String
-    COM_NOM : String
-    DEP_CODE : String
+        +COM_CODE : String
+        COM_NOM : String
+        DEP_CODE : String
     }
+    note right of communes
+       <b>Creation order</b>
+       <size:18><b><color:red>5</color></b></size>
+    end note
+
 }
-note left of database3
-   <b>Creation order</b>
-   <size:18><b><color:red> 2 </color></b></size> 
-end note
 
-package database1 <<database>>{
-    entity "Affaire" as affaires {
-    +ID : Integer
-    Nom : String
-    DEP_CODE : String
-    COM_CODE : String
-    <b>Precision</b> : Text
-    }
-}
-note left of database1
-   <b>Creation order</b>
-   <size:18><b><color:red> 3 </color></b></size> 
-end note
+user -- affaire : "user_id"
+affaire -- location : "affaire_id"
+location ..> departements : "department"
+location ..> communes : "commune"
 
-
-
-
-affaires ..> departements : "DEP_CODE"
-affaires ..> communes : "COM_CODE"
-communes ..> departements : "DEP_CODE
 @enduml
